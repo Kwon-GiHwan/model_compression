@@ -2,6 +2,9 @@ from model_compression.methods.base_method import BaseMethod
 from model_compression.methods.distillation.response_based import ResponseBasedDistiller
 from model_compression.methods.pruning.attention_head_pruner import AttentionHeadPruner
 from model_compression.methods.pruning.magnitude_pruner import MagnitudePruner
+from model_compression.methods.quantization.dynamic_quantizer import DynamicQuantizer
+from model_compression.methods.quantization.static_quantizer import StaticQuantizer
+from model_compression.methods.quantization.qat_quantizer import QATQuantizer
 from model_compression.registry import Registry
 from config import Config
 
@@ -9,6 +12,9 @@ _registry = Registry("METHOD")
 _registry.register("pruning.magnitude")(MagnitudePruner)
 _registry.register("pruning.attention_head")(AttentionHeadPruner)
 _registry.register("distillation.response_based")(ResponseBasedDistiller)
+_registry.register("quantization.dynamic")(DynamicQuantizer)
+_registry.register("quantization.static")(StaticQuantizer)
+_registry.register("quantization.qat")(QATQuantizer)
 
 
 def get_method(config: Config) -> BaseMethod:
@@ -34,6 +40,20 @@ def get_method(config: Config) -> BaseMethod:
     if config.METHOD == "pruning.attention_head":
         return AttentionHeadPruner(
             pruning_ratio=config.PRUNING_RATIO,
+        )
+    if config.METHOD == "quantization.dynamic":
+        return DynamicQuantizer(dtype=config.QUANT_DTYPE)
+    if config.METHOD == "quantization.static":
+        return StaticQuantizer(
+            backend=config.QUANT_BACKEND,
+            calibration_batches=config.QUANT_CALIBRATION_BATCHES,
+        )
+    if config.METHOD == "quantization.qat":
+        return QATQuantizer(
+            backend=config.QUANT_BACKEND,
+            epochs=config.TRAIN_EPOCHS,
+            device=config.TRAIN_DEVICE,
+            lr=config.TRAIN_LR,
         )
     return ResponseBasedDistiller(
         epochs=config.TRAIN_EPOCHS,

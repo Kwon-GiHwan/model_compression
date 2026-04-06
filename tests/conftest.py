@@ -47,6 +47,10 @@ def mock_config():
     config.PRUNING_RATIO = 0.3
     config.PRUNING_DEVICE = "cpu"
 
+    config.QUANT_DTYPE = "qint8"
+    config.QUANT_BACKEND = "x86"
+    config.QUANT_CALIBRATION_BATCHES = 100
+
     config.DISTILL_TEMPERATURE = 4.0
     config.DISTILL_ALPHA = 0.7
 

@@ -31,6 +31,10 @@ class Config:
     PRUNING_RATIO: float = field(default_factory=lambda: float(os.getenv("PRUNING_RATIO", "0.3")))
     PRUNING_DEVICE: str = field(default_factory=lambda: os.getenv("PRUNING_DEVICE", "cpu"))
 
+    QUANT_DTYPE: str = field(default_factory=lambda: os.getenv("QUANT_DTYPE", "qint8"))
+    QUANT_BACKEND: str = field(default_factory=lambda: os.getenv("QUANT_BACKEND", "x86"))
+    QUANT_CALIBRATION_BATCHES: int = field(default_factory=lambda: int(os.getenv("QUANT_CALIBRATION_BATCHES", "100")))
+
     DISTILL_TEMPERATURE: float = field(default_factory=lambda: float(os.getenv("DISTILL_TEMPERATURE", "4.0")))
     DISTILL_ALPHA: float = field(default_factory=lambda: float(os.getenv("DISTILL_ALPHA", "0.7")))
 
