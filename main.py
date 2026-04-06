@@ -1,3 +1,5 @@
+from copy import copy
+
 from model_compression.benchmark.latency_benchmark import LatencyBenchmark
 from model_compression.data.registry import get_dataloader
 from model_compression.methods.registry import get_method
@@ -12,17 +14,17 @@ def run_apply(config: Config):
 
     student_wrapper = get_model(config)
 
+    method = get_method(config)
+    method.validate(config)
+
     teacher = None
-    if config.METHOD.startswith("distillation"):
+    if method.requires_teacher():
         teacher = get_teacher_loader(config).load()
 
     dataloader = None
-    if config.METHOD.startswith("distillation"):
+    if method.requires_dataloader():
         dl_wrapper = get_dataloader(config, tokenizer=student_wrapper.get_tokenizer())
         dataloader = dl_wrapper.get_dataloader()
-
-    method = get_method(config)
-    method.validate(config)
 
     compressed = method.apply(
         student=student_wrapper.get_raw(),
@@ -30,7 +32,10 @@ def run_apply(config: Config):
         dataloader=dataloader,
     )
 
-    student_wrapper._model = compressed
+    try:
+        student_wrapper.set_raw(compressed)
+    except NotImplementedError:
+        student_wrapper._model = compressed  # temporary fallback
     student_wrapper.save(config.OUTPUT_MODEL_PATH)
     print(f"[Main] 압축 모델 저장: {config.OUTPUT_MODEL_PATH}")
 
@@ -41,14 +46,10 @@ def run_benchmark(config: Config):
     original_wrapper = get_model(config)
     original = original_wrapper.get_raw()
 
-    # 압축 모델 로드 (저장 타입에 따라 분기)
-    import torch
-    from transformers import AutoModel
-
-    try:
-        compressed = AutoModel.from_pretrained(config.OUTPUT_MODEL_PATH)
-    except Exception:
-        compressed = torch.load(config.OUTPUT_MODEL_PATH, map_location="cpu")
+    benchmark_config = copy(config)
+    benchmark_config.MODEL_PATH = config.OUTPUT_MODEL_PATH
+    compressed_wrapper = get_model(benchmark_config)
+    compressed = compressed_wrapper.get_raw()
 
     bench = LatencyBenchmark()
     reporter = ConsoleReporter()
