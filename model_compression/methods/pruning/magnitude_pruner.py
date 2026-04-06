@@ -14,18 +14,19 @@ class MagnitudePruner(BaseMethod):
     """
 
     def __init__(
-        self, pruning_ratio: float, input_size: int = 224, is_nlp: bool = False
+        self, pruning_ratio: float, input_size: int = 224, is_nlp: bool = False, max_length: int = 128
     ):
         self.pruning_ratio = pruning_ratio
         self.input_size = input_size
         self.is_nlp = is_nlp
+        self.max_length = max_length
 
     def apply(self, student, teacher=None, dataloader=None):
         model = copy.deepcopy(student).to("cpu").eval()
 
         # 입력 예시: NLP는 토큰 ID, 이미지는 픽셀
         if self.is_nlp:
-            example_input = {"input_ids": torch.zeros(1, 128, dtype=torch.long)}
+            example_input = {"input_ids": torch.zeros(1, self.max_length, dtype=torch.long)}
         else:
             example_input = torch.randn(1, 3, self.input_size, self.input_size)
 
