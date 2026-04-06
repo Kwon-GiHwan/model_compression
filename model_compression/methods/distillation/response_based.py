@@ -25,6 +25,23 @@ class ResponseBasedDistiller(BaseMethod):
         self.alpha = alpha
         self.lr = lr
 
+    @classmethod
+    def requires_teacher(cls) -> bool:
+        return True
+
+    @classmethod
+    def requires_dataloader(cls) -> bool:
+        return True
+
+    @staticmethod
+    def _extract_logits(output):
+        """모델 출력에서 logits 추출. HuggingFace 출력과 순수 텐서 모두 지원."""
+        if hasattr(output, 'logits'):
+            return output.logits
+        if isinstance(output, (tuple, list)):
+            return output[0]
+        return output  # raw tensor
+
     def apply(self, student, teacher, dataloader=None):
         if teacher is None:
             raise ValueError("[Distiller] teacher 모델이 필요합니다")
@@ -43,16 +60,16 @@ class ResponseBasedDistiller(BaseMethod):
                 if isinstance(batch, (list, tuple)):
                     inputs, labels = batch[0].to(self.device), batch[1].to(self.device)
                     with torch.no_grad():
-                        teacher_logits = teacher(inputs).logits
-                    student_logits = student(inputs).logits
+                        teacher_logits = self._extract_logits(teacher(inputs))
+                    student_logits = self._extract_logits(student(inputs))
                 else:
                     inputs = {
                         k: v.to(self.device) for k, v in batch.items() if k != "label"
                     }
                     labels = batch["label"].to(self.device)
                     with torch.no_grad():
-                        teacher_logits = teacher(**inputs).logits
-                    student_logits = student(**inputs).logits
+                        teacher_logits = self._extract_logits(teacher(**inputs))
+                    student_logits = self._extract_logits(student(**inputs))
 
                 kd_loss = F.kl_div(
                     F.log_softmax(student_logits / T, dim=-1),
