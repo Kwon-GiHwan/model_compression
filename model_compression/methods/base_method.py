@@ -1,13 +1,14 @@
-from abc import ABC, abstractmethod
+from __future__ import annotations
 
-import torch.nn as nn
+from abc import ABC, abstractmethod
+from typing import Any
 
 
 class BaseMethod(ABC):
     """
     모든 압축 방법론의 공통 인터페이스.
 
-    student : 압축 대상 nn.Module
+    student : 압축 대상 모델 객체
     teacher : KD 계열에서 사용, Pruning은 None
     dataloader : 학습이 필요한 방법론에서 사용
 
@@ -19,8 +20,18 @@ class BaseMethod(ABC):
 
     @abstractmethod
     def apply(
-        self, student: nn.Module, teacher: nn.Module = None, dataloader=None
-    ) -> nn.Module: ...
+        self, student: Any, teacher: Any = None, dataloader: Any = None
+    ) -> Any: ...
 
-    def validate(self, config) -> None:
+    def validate(self, config: Any) -> None:
         pass
+
+    @classmethod
+    def requires_teacher(cls) -> bool:
+        """이 방법론이 teacher 모델을 필요로 하는지 여부"""
+        return False
+
+    @classmethod
+    def requires_dataloader(cls) -> bool:
+        """이 방법론이 dataloader를 필요로 하는지 여부"""
+        return False
