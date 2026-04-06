@@ -23,7 +23,7 @@ def run_apply(config: Config):
 
     dataloader = None
     if method.requires_dataloader():
-        dl_wrapper = get_dataloader(config, tokenizer=student_wrapper.get_tokenizer())
+        dl_wrapper = get_dataloader(config, tokenizer=student_wrapper.get_preprocessor())
         dataloader = dl_wrapper.get_dataloader()
 
     compressed = method.apply(
@@ -32,10 +32,7 @@ def run_apply(config: Config):
         dataloader=dataloader,
     )
 
-    try:
-        student_wrapper.set_raw(compressed)
-    except NotImplementedError:
-        student_wrapper._model = compressed  # temporary fallback
+    student_wrapper.set_raw(compressed)
     student_wrapper.save(config.OUTPUT_MODEL_PATH)
     print(f"[Main] 압축 모델 저장: {config.OUTPUT_MODEL_PATH}")
 

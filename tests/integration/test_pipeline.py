@@ -52,7 +52,7 @@ class TestPruningPipeline:
         mock_pruner.step.assert_called_once()
 
         # Step 3: Save compressed model
-        model_wrapper._model = compressed_model
+        model_wrapper.set_raw(compressed_model)
         model_wrapper.save(output_path)
 
         # Step 4: Benchmark
@@ -73,7 +73,7 @@ class TestPruningPipeline:
 
         # Save
         wrapper1 = PyTorchModel()
-        wrapper1._model = simple_cnn_model
+        wrapper1.set_raw(simple_cnn_model)
         wrapper1.save(model_path)
 
         # Load

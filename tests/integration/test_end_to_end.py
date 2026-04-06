@@ -37,8 +37,7 @@ class TestEndToEndMagnitudePruning:
         # Mock model loading
         mock_model_instance = Mock()
         mock_model_instance.get_raw.return_value = simple_cnn_model
-        mock_model_instance.get_tokenizer.return_value = None
-        mock_model_instance._model = simple_cnn_model
+        mock_model_instance.get_preprocessor.return_value = None
         mock_pytorch_model.return_value = mock_model_instance
         mock_model_instance.load.return_value = mock_model_instance
 
@@ -90,12 +89,8 @@ class TestEndToEndFullMode:
 
     @patch("model_compression.model.registry.PyTorchModel")
     @patch("model_compression.methods.pruning.magnitude_pruner.tp")
-    @patch("torch.load")
-    @patch("transformers.AutoModel.from_pretrained")
     def test_full_mode_execution(
         self,
-        mock_hf_load,
-        mock_torch_load,
         mock_tp,
         mock_pytorch_model,
         mock_config,
@@ -117,17 +112,13 @@ class TestEndToEndFullMode:
         # Mock model
         mock_model_instance = Mock()
         mock_model_instance.get_raw.return_value = simple_cnn_model
-        mock_model_instance.get_tokenizer.return_value = None
-        mock_model_instance._model = simple_cnn_model
+        mock_model_instance.get_preprocessor.return_value = None
         mock_pytorch_model.return_value = mock_model_instance
         mock_model_instance.load.return_value = mock_model_instance
 
         # Mock pruning
         mock_pruner = Mock()
         mock_tp.pruner.MagnitudePruner.return_value = mock_pruner
-
-        # Mock compressed model loading for benchmark
-        mock_torch_load.return_value = simple_cnn_model
 
         # Patch Config to return our mock
         with patch("main.Config", return_value=mock_config):

@@ -1,5 +1,5 @@
 import torch
-from transformers import AutoFeatureExtractor, AutoModel, AutoTokenizer
+from transformers import AutoModel, AutoProcessor, AutoTokenizer
 
 from model_compression.model.base_model import BaseModel
 
@@ -27,7 +27,7 @@ class HuggingFaceModel(BaseModel):
         except Exception:
             # Vision 모델 등 토크나이저 없는 경우
             try:
-                self._tokenizer = AutoFeatureExtractor.from_pretrained(path)
+                self._tokenizer = AutoProcessor.from_pretrained(path)
             except Exception:
                 self._tokenizer = None
 

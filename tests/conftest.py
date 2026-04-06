@@ -74,7 +74,7 @@ def simple_mlp_model():
 
 
 @pytest.fixture
-def mock_tokenizer():
+def mock_preprocessor():
     """Mock tokenizer for NLP tests."""
     tokenizer = MagicMock()
     tokenizer.return_value = {

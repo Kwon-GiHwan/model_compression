@@ -26,14 +26,14 @@ class TestPyTorchModel:
 
         assert loaded is not None
         assert isinstance(loaded.get_raw(), nn.Module)
-        assert loaded.get_tokenizer() is None
+        assert loaded.get_preprocessor() is None
 
     def test_save_model(self, simple_cnn_model, temp_dir):
         """Test saving a PyTorch model."""
         model_path = f"{temp_dir}/saved_model.pt"
 
         pytorch_model = PyTorchModel()
-        pytorch_model._model = simple_cnn_model
+        pytorch_model.set_raw(simple_cnn_model)
         pytorch_model.save(model_path)
 
         assert (
@@ -52,7 +52,7 @@ class TestPyTorchModel:
     def test_get_raw_returns_model(self, simple_cnn_model):
         """Test that get_raw returns the underlying model."""
         pytorch_model = PyTorchModel()
-        pytorch_model._model = simple_cnn_model
+        pytorch_model.set_raw(simple_cnn_model)
 
         raw = pytorch_model.get_raw()
         assert raw is simple_cnn_model
@@ -76,7 +76,7 @@ class TestHuggingFaceModel:
         assert loaded is not None
         mock_auto_model.from_pretrained.assert_called_once_with("test/model")
         mock_tokenizer.from_pretrained.assert_called_once_with("test/model")
-        assert hf_model.get_tokenizer() is mock_tok
+        assert hf_model.get_preprocessor() is mock_tok
 
     @patch("model_compression.model.huggingface_model.AutoModel")
     @patch("model_compression.model.huggingface_model.AutoTokenizer")
@@ -87,7 +87,7 @@ class TestHuggingFaceModel:
         mock_tokenizer.from_pretrained.side_effect = Exception("No tokenizer")
 
         with patch(
-            "model_compression.model.huggingface_model.AutoFeatureExtractor"
+            "model_compression.model.huggingface_model.AutoProcessor"
         ) as mock_extractor:
             mock_extractor.from_pretrained.side_effect = Exception("No extractor")
 
@@ -95,7 +95,7 @@ class TestHuggingFaceModel:
             loaded = hf_model.load("test/model")
 
             assert loaded is not None
-            assert hf_model.get_tokenizer() is None
+            assert hf_model.get_preprocessor() is None
 
     @patch("model_compression.model.huggingface_model.AutoModel")
     def test_save_model(self, mock_auto_model, temp_dir):
@@ -104,7 +104,7 @@ class TestHuggingFaceModel:
         mock_tokenizer = Mock()
 
         hf_model = HuggingFaceModel()
-        hf_model._model = mock_model
+        hf_model.set_raw(mock_model)
         hf_model._tokenizer = mock_tokenizer
 
         save_path = f"{temp_dir}/saved_model"
