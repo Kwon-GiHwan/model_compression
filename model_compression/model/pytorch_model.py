@@ -1,5 +1,4 @@
 import torch
-import torch.nn as nn
 
 from model_compression.model.base_model import BaseModel
 
@@ -11,7 +10,7 @@ class PyTorchModel(BaseModel):
     """
 
     def __init__(self):
-        self._model: nn.Module = None
+        self._model = None
 
     def load(self, path: str) -> "PyTorchModel":
         self._model = torch.load(path, map_location="cpu", weights_only=False)
@@ -29,8 +28,11 @@ class PyTorchModel(BaseModel):
         torch.save(self._model, path)
         print(f"[PyTorchModel] 저장 완료: {path}")
 
-    def get_raw(self) -> nn.Module:
+    def set_raw(self, model) -> None:
+        self._model = model
+
+    def get_raw(self):
         return self._model
 
-    def get_tokenizer(self):
+    def get_preprocessor(self):
         return None

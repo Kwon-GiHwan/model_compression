@@ -39,8 +39,11 @@ class HuggingFaceModel(BaseModel):
             self._tokenizer.save_pretrained(path)
         print(f"[HuggingFaceModel] 저장 완료: {path}")
 
+    def set_raw(self, model) -> None:
+        self._model = model
+
     def get_raw(self):
         return self._model
 
-    def get_tokenizer(self):
+    def get_preprocessor(self):
         return self._tokenizer
