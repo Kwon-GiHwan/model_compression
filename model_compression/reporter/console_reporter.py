@@ -29,13 +29,20 @@ class ConsoleReporter(BaseReporter):
         print(f"  • Model Size: {result['param_size_mb']:.2f} MB")
 
     def _print_comparison(self, original: dict, compressed: dict):
-        speedup = original["avg_latency_ms"] / compressed["avg_latency_ms"]
-        size_reduction = (
-            1 - compressed["param_size_mb"] / original["param_size_mb"]
-        ) * 100
-        param_reduction = (
-            1 - compressed["total_params"] / original["total_params"]
-        ) * 100
+        if compressed["avg_latency_ms"] > 0:
+            speedup = original["avg_latency_ms"] / compressed["avg_latency_ms"]
+        else:
+            speedup = float("inf")
+
+        if original["param_size_mb"] > 0:
+            size_reduction = (1 - compressed["param_size_mb"] / original["param_size_mb"]) * 100
+        else:
+            size_reduction = 0.0
+
+        if original["total_params"] > 0:
+            param_reduction = (1 - compressed["total_params"] / original["total_params"]) * 100
+        else:
+            param_reduction = 0.0
 
         print(f"  • Speedup: {speedup:.2f}x")
         print(f"  • Size Reduction: {size_reduction:.2f}%")

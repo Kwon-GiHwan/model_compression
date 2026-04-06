@@ -46,5 +46,7 @@ class LatencyBenchmark(BaseBenchmark):
             "min_latency_ms": round(min(latencies), 3),
             "max_latency_ms": round(max(latencies), 3),
             "total_params": total_params,
-            "param_size_mb": round(total_params * 4 / (1024**2), 2),
+            "param_size_mb": round(
+                sum(p.numel() * p.element_size() for p in model.parameters()) / (1024**2), 2
+            ),
         }
