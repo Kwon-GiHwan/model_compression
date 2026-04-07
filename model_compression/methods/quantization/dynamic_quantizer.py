@@ -24,6 +24,10 @@ class DynamicQuantizer(BaseMethod):
         print("[DynamicQuantizer] 완료")
         return quantized
 
+    @classmethod
+    def from_config(cls, config):
+        return cls(dtype=config.QUANT_DTYPE)
+
     def validate(self, config):
         valid_dtypes = ("qint8", "float16")
         if config.QUANT_DTYPE not in valid_dtypes:

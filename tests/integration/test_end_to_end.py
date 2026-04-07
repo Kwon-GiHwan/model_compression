@@ -19,10 +19,10 @@ class TestEndToEndMagnitudePruning:
 
     """Test complete magnitude pruning workflow."""
 
-    @patch("model_compression.model.registry.PyTorchModel")
+    @patch("main.get_model")
     @patch("model_compression.methods.pruning.magnitude_pruner.tp")
     def test_magnitude_pruning_apply_mode(
-        self, mock_tp, mock_pytorch_model, mock_config, simple_cnn_model, temp_dir
+        self, mock_tp, mock_get_model, mock_config, simple_cnn_model, temp_dir
     ):
         """Test end-to-end magnitude pruning in apply mode."""
         from main import run_apply
@@ -34,12 +34,11 @@ class TestEndToEndMagnitudePruning:
         mock_config.OUTPUT_MODEL_PATH = f"{temp_dir}/output.pt"
         mock_config.DATASET_TYPE = "local_folder"
 
-        # Mock model loading
+        # Mock model loading via get_model (registry now uses from_config internally)
         mock_model_instance = Mock()
         mock_model_instance.get_raw.return_value = simple_cnn_model
         mock_model_instance.get_preprocessor.return_value = None
-        mock_pytorch_model.return_value = mock_model_instance
-        mock_model_instance.load.return_value = mock_model_instance
+        mock_get_model.return_value = mock_model_instance
 
         # Mock pruning
         mock_pruner = Mock()
@@ -49,7 +48,7 @@ class TestEndToEndMagnitudePruning:
         run_apply(mock_config)
 
         # Verify
-        mock_model_instance.load.assert_called_once()
+        mock_get_model.assert_called_once_with(mock_config)
         mock_pruner.step.assert_called_once()
         mock_model_instance.save.assert_called_once_with(mock_config.OUTPUT_MODEL_PATH)
 
@@ -87,12 +86,12 @@ class TestEndToEndDistillation:
 class TestEndToEndFullMode:
     """Test complete workflow in full mode (apply + benchmark)."""
 
-    @patch("model_compression.model.registry.PyTorchModel")
+    @patch("main.get_model")
     @patch("model_compression.methods.pruning.magnitude_pruner.tp")
     def test_full_mode_execution(
         self,
         mock_tp,
-        mock_pytorch_model,
+        mock_get_model,
         mock_config,
         simple_cnn_model,
         temp_dir,
@@ -108,13 +107,13 @@ class TestEndToEndFullMode:
         mock_config.BENCHMARK_DEVICE = "cpu"
         mock_config.BENCHMARK_RUNS = 2
         mock_config.DATASET_TYPE = "local_folder"
+        mock_config.BENCHMARK_INPUT_SIZE = 224
 
-        # Mock model
+        # Mock model via get_model (registry now uses from_config internally)
         mock_model_instance = Mock()
         mock_model_instance.get_raw.return_value = simple_cnn_model
         mock_model_instance.get_preprocessor.return_value = None
-        mock_pytorch_model.return_value = mock_model_instance
-        mock_model_instance.load.return_value = mock_model_instance
+        mock_get_model.return_value = mock_model_instance
 
         # Mock pruning
         mock_pruner = Mock()
@@ -125,10 +124,10 @@ class TestEndToEndFullMode:
             main()
 
         # Verify both apply and benchmark were executed
+        # Apply + Benchmark: get_model called 3 times (apply + 2x benchmark)
+        assert mock_get_model.call_count >= 2
         # Apply: save called
         mock_model_instance.save.assert_called()
-        # Benchmark: model loaded twice (original + compressed)
-        assert mock_model_instance.load.call_count >= 2
 
 
 class TestEndToEndErrorHandling:

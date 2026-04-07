@@ -126,32 +126,32 @@ class TestResponseBasedDistiller:
 class TestMethodsRegistry:
     """Test methods registry."""
 
-    @patch("model_compression.methods.registry.MagnitudePruner")
-    def test_get_magnitude_pruner(self, mock_pruner, mock_config):
+    def test_get_magnitude_pruner(self, mock_config):
         """Test getting magnitude pruner from registry."""
         mock_config.METHOD = "pruning.magnitude"
         mock_config.PRUNING_RATIO = 0.3
         mock_config.BENCHMARK_INPUT_SIZE = 224
         mock_config.DATASET_TYPE = "hf_datasets"
+        mock_config.DATASET_MAX_LENGTH = 128
 
         result = get_method(mock_config)
 
-        mock_pruner.assert_called_once_with(
-            pruning_ratio=0.3, input_size=224, is_nlp=True
-        )
+        assert isinstance(result, MagnitudePruner)
+        assert result.pruning_ratio == 0.3
+        assert result.input_size == 224
+        assert result.is_nlp is True
 
-    @patch("model_compression.methods.registry.AttentionHeadPruner")
-    def test_get_attention_head_pruner(self, mock_pruner, mock_config):
+    def test_get_attention_head_pruner(self, mock_config):
         """Test getting attention head pruner from registry."""
         mock_config.METHOD = "pruning.attention_head"
         mock_config.PRUNING_RATIO = 0.3
 
         result = get_method(mock_config)
 
-        mock_pruner.assert_called_once_with(pruning_ratio=0.3)
+        assert isinstance(result, AttentionHeadPruner)
+        assert result.pruning_ratio == 0.3
 
-    @patch("model_compression.methods.registry.ResponseBasedDistiller")
-    def test_get_response_based_distiller(self, mock_distiller, mock_config):
+    def test_get_response_based_distiller(self, mock_config):
         """Test getting response based distiller from registry."""
         mock_config.METHOD = "distillation.response_based"
         mock_config.TRAIN_EPOCHS = 10
@@ -162,9 +162,12 @@ class TestMethodsRegistry:
 
         result = get_method(mock_config)
 
-        mock_distiller.assert_called_once_with(
-            epochs=10, device="cpu", temperature=4.0, alpha=0.7, lr=1e-4
-        )
+        assert isinstance(result, ResponseBasedDistiller)
+        assert result.epochs == 10
+        assert result.device == "cpu"
+        assert result.temperature == 4.0
+        assert result.alpha == 0.7
+        assert result.lr == 1e-4
 
     def test_get_invalid_method(self, mock_config):
         """Test that invalid method raises error."""

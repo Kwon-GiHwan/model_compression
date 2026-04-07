@@ -1,11 +1,11 @@
 from copy import copy
 
-from model_compression.benchmark.latency_benchmark import LatencyBenchmark
+from model_compression.benchmark.registry import get_benchmark
 from model_compression.data.registry import get_dataloader
 from model_compression.methods.registry import get_method
 from model_compression.model.loader import get_teacher_loader
 from model_compression.model.registry import get_model
-from model_compression.reporter.console_reporter import ConsoleReporter
+from model_compression.reporter.registry import get_reporter
 from config import Config
 
 
@@ -23,7 +23,7 @@ def run_apply(config: Config):
 
     dataloader = None
     if method.requires_dataloader():
-        dl_wrapper = get_dataloader(config, tokenizer=student_wrapper.get_preprocessor())
+        dl_wrapper = get_dataloader(config)
         dataloader = dl_wrapper.get_dataloader()
 
     compressed = method.apply(
@@ -48,8 +48,8 @@ def run_benchmark(config: Config):
     compressed_wrapper = get_model(benchmark_config)
     compressed = compressed_wrapper.get_raw()
 
-    bench = LatencyBenchmark()
-    reporter = ConsoleReporter()
+    bench = get_benchmark(config)
+    reporter = get_reporter(config)
 
     original_result = bench.run(original, config)
     compressed_result = bench.run(compressed, config)

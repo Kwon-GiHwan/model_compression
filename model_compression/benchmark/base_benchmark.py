@@ -14,3 +14,7 @@ class BaseBenchmark(ABC):
         벤치마크 실행 후 결과를 dict로 반환.
         """
         ...
+
+    @classmethod
+    def from_config(cls, config) -> "BaseBenchmark":
+        raise NotImplementedError

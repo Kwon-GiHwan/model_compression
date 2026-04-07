@@ -9,6 +9,13 @@ class HuggingFaceLoader(BaseLoader):
         self.repo_id = repo_id
         self.filename = filename
 
+    @classmethod
+    def from_config(cls, config) -> "HuggingFaceLoader":
+        return cls(
+            repo_id=config.TEACHER_HF_REPO,
+            filename=config.TEACHER_HF_FILENAME,
+        )
+
     def load(self):
         print(f"[HuggingFaceLoader] HF Hub 로드: {self.repo_id}")
 

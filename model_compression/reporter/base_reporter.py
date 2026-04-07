@@ -14,3 +14,7 @@ class BaseReporter(ABC):
         벤치마크 결과를 출력하거나 저장.
         """
         ...
+
+    @classmethod
+    def from_config(cls, config) -> "BaseReporter":
+        raise NotImplementedError

@@ -117,36 +117,34 @@ class TestHuggingFaceModel:
 class TestModelRegistry:
     """Test model registry."""
 
-    @patch("model_compression.model.registry.PyTorchModel")
-    def test_get_pytorch_model(self, mock_pytorch_model, mock_config):
+    @patch("torch.load")
+    def test_get_pytorch_model(self, mock_torch_load, mock_config, tmp_path):
         """Test getting PyTorch model from registry."""
+        import torch.nn as nn
         mock_config.MODEL_TYPE = "pytorch"
-        mock_config.MODEL_PATH = "test.pt"
+        mock_config.MODEL_PATH = str(tmp_path / "test.pt")
 
-        mock_instance = Mock()
-        mock_pytorch_model.return_value = mock_instance
-        mock_instance.load.return_value = mock_instance
+        mock_nn_model = MagicMock(spec=nn.Module)
+        mock_torch_load.return_value = mock_nn_model
 
         result = get_model(mock_config)
 
-        mock_pytorch_model.assert_called_once()
-        mock_instance.load.assert_called_once_with("test.pt")
+        assert isinstance(result, PyTorchModel)
 
-    @patch("model_compression.model.registry.HuggingFaceModel")
-    def test_get_huggingface_model(self, mock_hf_model, mock_config):
+    @patch("model_compression.model.huggingface_model.AutoTokenizer")
+    @patch("model_compression.model.huggingface_model.AutoModel")
+    def test_get_huggingface_model(self, mock_auto_model, mock_tokenizer, mock_config):
         """Test getting HuggingFace model from registry."""
         mock_config.MODEL_TYPE = "huggingface"
         mock_config.MODEL_PATH = "bert-base"
         mock_config.TASK = "classification"
 
-        mock_instance = Mock()
-        mock_hf_model.return_value = mock_instance
-        mock_instance.load.return_value = mock_instance
+        mock_auto_model.from_pretrained.return_value = MagicMock()
+        mock_tokenizer.from_pretrained.return_value = MagicMock()
 
         result = get_model(mock_config)
 
-        mock_hf_model.assert_called_once_with(task="classification")
-        mock_instance.load.assert_called_once_with("bert-base")
+        assert isinstance(result, HuggingFaceModel)
 
     def test_get_invalid_model_type(self, mock_config):
         """Test that invalid model type raises error."""

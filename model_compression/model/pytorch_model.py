@@ -36,3 +36,8 @@ class PyTorchModel(BaseModel):
 
     def get_preprocessor(self):
         return None
+
+    @classmethod
+    def from_config(cls, config) -> "PyTorchModel":
+        instance = cls()
+        return instance.load(config.MODEL_PATH)

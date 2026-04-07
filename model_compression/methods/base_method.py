@@ -27,6 +27,11 @@ class BaseMethod(ABC):
         pass
 
     @classmethod
+    def from_config(cls, config: Any) -> "BaseMethod":
+        """Config 기반으로 인스턴스 생성. 서브클래스에서 반드시 구현."""
+        raise NotImplementedError(f"{cls.__name__}.from_config()이 구현되지 않았습니다")
+
+    @classmethod
     def requires_teacher(cls) -> bool:
         """이 방법론이 teacher 모델을 필요로 하는지 여부"""
         return False

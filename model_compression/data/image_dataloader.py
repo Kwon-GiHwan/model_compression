@@ -29,6 +29,16 @@ class ImageDataLoader(BaseDataLoader):
         self.normalize_mean = normalize_mean or [0.485, 0.456, 0.406]
         self.normalize_std = normalize_std or [0.229, 0.224, 0.225]
 
+    @classmethod
+    def from_config(cls, config) -> "ImageDataLoader":
+        return cls(
+            dataset_path=config.DATASET_PATH,
+            task=config.TASK,
+            input_size=config.BENCHMARK_INPUT_SIZE,
+            batch_size=config.DATASET_BATCH_SIZE,
+            split=config.DATASET_SPLIT,
+        )
+
     def get_dataloader(self) -> DataLoader:
         transform = T.Compose(
             [

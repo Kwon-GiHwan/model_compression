@@ -61,6 +61,8 @@ def mock_config():
     config.BENCHMARK_DEVICE = "cpu"
     config.BENCHMARK_RUNS = 10
     config.BENCHMARK_INPUT_SIZE = 224
+    config.BENCHMARK_TYPE = "latency"
+    config.REPORTER_TYPE = "console"
 
     return config
 

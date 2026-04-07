@@ -109,8 +109,7 @@ class TestNLPDataLoader:
 class TestDataRegistry:
     """Test data registry."""
 
-    @patch("model_compression.data.registry.NLPDataLoader")
-    def test_get_nlp_dataloader(self, mock_nlp_loader, mock_config):
+    def test_get_nlp_dataloader(self, mock_config):
         """Test getting NLP dataloader from registry."""
         mock_config.DATASET_TYPE = "hf_datasets"
         mock_config.DATASET_NAME = "test_dataset"
@@ -122,17 +121,15 @@ class TestDataRegistry:
 
         result = get_dataloader(mock_config)
 
-        mock_nlp_loader.assert_called_once_with(
-            dataset_name="test_dataset",
-            tokenizer_path="test/model",
-            dataset_config="config",
-            split="train",
-            batch_size=16,
-            max_length=128,
-        )
+        assert isinstance(result, NLPDataLoader)
+        assert result.dataset_name == "test_dataset"
+        assert result.tokenizer_path == "test/model"
+        assert result.dataset_config == "config"
+        assert result.split == "train"
+        assert result.batch_size == 16
+        assert result.max_length == 128
 
-    @patch("model_compression.data.registry.ImageDataLoader")
-    def test_get_image_dataloader(self, mock_image_loader, mock_config):
+    def test_get_image_dataloader(self, mock_config):
         """Test getting image dataloader from registry."""
         mock_config.DATASET_TYPE = "local_folder"
         mock_config.DATASET_PATH = "/test/images"
@@ -143,13 +140,12 @@ class TestDataRegistry:
 
         result = get_dataloader(mock_config)
 
-        mock_image_loader.assert_called_once_with(
-            dataset_path="/test/images",
-            task="classification",
-            input_size=224,
-            batch_size=32,
-            split="train",
-        )
+        assert isinstance(result, ImageDataLoader)
+        assert result.dataset_path == "/test/images"
+        assert result.task == "classification"
+        assert result.input_size == 224
+        assert result.batch_size == 32
+        assert result.split == "train"
 
     def test_get_invalid_dataset_type(self, mock_config):
         """Test that invalid dataset type raises error."""

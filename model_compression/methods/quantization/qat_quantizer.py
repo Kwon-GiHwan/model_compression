@@ -4,6 +4,7 @@ import torch
 import torch.nn.functional as F
 
 from model_compression.methods.base_method import BaseMethod
+from model_compression.methods.utils import extract_logits
 
 
 class QATQuantizer(BaseMethod):
@@ -29,15 +30,6 @@ class QATQuantizer(BaseMethod):
     def requires_dataloader(cls) -> bool:
         return True
 
-    @staticmethod
-    def _extract_logits(output):
-        """모델 출력에서 logits 추출."""
-        if hasattr(output, "logits"):
-            return output.logits
-        if isinstance(output, (tuple, list)):
-            return output[0]
-        return output
-
     def apply(self, student, teacher=None, dataloader=None):
         if dataloader is None:
             raise ValueError("[QATQuantizer] 학습용 dataloader가 필요합니다")
@@ -53,13 +45,13 @@ class QATQuantizer(BaseMethod):
             for batch in dataloader:
                 if isinstance(batch, (list, tuple)):
                     inputs, labels = batch[0].to(self.device), batch[1].to(self.device)
-                    logits = self._extract_logits(prepared(inputs))
+                    logits = extract_logits(prepared(inputs))
                 else:
                     inputs = {
                         k: v.to(self.device) for k, v in batch.items() if k != "label"
                     }
                     labels = batch["label"].to(self.device)
-                    logits = self._extract_logits(prepared(**inputs))
+                    logits = extract_logits(prepared(**inputs))
 
                 loss = F.cross_entropy(logits, labels)
                 optimizer.zero_grad()
@@ -73,6 +65,15 @@ class QATQuantizer(BaseMethod):
         quantized = torch.ao.quantization.convert(prepared.cpu())
         print("[QATQuantizer] 완료")
         return quantized
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(
+            backend=config.QUANT_BACKEND,
+            epochs=config.TRAIN_EPOCHS,
+            device=config.TRAIN_DEVICE,
+            lr=config.TRAIN_LR,
+        )
 
     def validate(self, config):
         if config.TRAIN_EPOCHS <= 0:

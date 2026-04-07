@@ -113,6 +113,10 @@ class AttentionHeadPruner(BaseMethod):
         print(f"[AttentionHeadPruner] 완료: {pruned_heads}")
         return model
 
+    @classmethod
+    def from_config(cls, config):
+        return cls(pruning_ratio=config.PRUNING_RATIO)
+
     def validate(self, config):
         if config.MODEL_TYPE != "huggingface":
             raise ValueError(

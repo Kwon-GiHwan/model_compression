@@ -43,6 +43,16 @@ class MagnitudePruner(BaseMethod):
         print("[MagnitudePruner] 완료")
         return model
 
+    @classmethod
+    def from_config(cls, config):
+        is_nlp = config.DATASET_TYPE == "hf_datasets"
+        return cls(
+            pruning_ratio=config.PRUNING_RATIO,
+            input_size=config.BENCHMARK_INPUT_SIZE,
+            is_nlp=is_nlp,
+            max_length=config.DATASET_MAX_LENGTH,
+        )
+
     def validate(self, config):
         if not 0 < config.PRUNING_RATIO < 1:
             raise ValueError("PRUNING_RATIO는 0~1 사이여야 합니다")

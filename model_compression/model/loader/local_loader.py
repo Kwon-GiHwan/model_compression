@@ -8,6 +8,10 @@ class LocalLoader(BaseLoader):
     def __init__(self, model_path: str):
         self.model_path = model_path
 
+    @classmethod
+    def from_config(cls, config) -> "LocalLoader":
+        return cls(model_path=config.TEACHER_MODEL_PATH)
+
     def load(self):
         print(f"[LocalLoader] 로컬 로드: {self.model_path}")
         try:

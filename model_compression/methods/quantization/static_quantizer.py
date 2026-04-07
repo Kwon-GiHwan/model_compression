@@ -42,6 +42,13 @@ class StaticQuantizer(BaseMethod):
         print(f"[StaticQuantizer] 완료 (calibration batches: {min(i + 1, self.calibration_batches)})")
         return quantized
 
+    @classmethod
+    def from_config(cls, config):
+        return cls(
+            backend=config.QUANT_BACKEND,
+            calibration_batches=config.QUANT_CALIBRATION_BATCHES,
+        )
+
     def validate(self, config):
         valid_backends = ("x86", "fbgemm", "qnnpack")
         if config.QUANT_BACKEND not in valid_backends:

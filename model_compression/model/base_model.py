@@ -21,14 +21,16 @@ class BaseModel(ABC):
         """압축 방법론에 전달할 원시 모델 객체 반환"""
         ...
 
+    @abstractmethod
     def set_raw(self, model: Any) -> None:
         """압축된 모델을 다시 래퍼에 설정"""
-        raise NotImplementedError
+        ...
 
+    @abstractmethod
     def get_preprocessor(self) -> Any:
         """전처리기 반환 (tokenizer, feature_extractor, processor 등). 없으면 None"""
-        raise NotImplementedError
+        ...
 
-    def get_tokenizer(self) -> Any:
-        """Deprecated: use get_preprocessor() instead."""
-        return self.get_preprocessor()
+    @classmethod
+    def from_config(cls, config: Any) -> "BaseModel":
+        raise NotImplementedError

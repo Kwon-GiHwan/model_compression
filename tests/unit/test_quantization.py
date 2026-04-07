@@ -11,6 +11,7 @@ from model_compression.methods.quantization.dynamic_quantizer import DynamicQuan
 from model_compression.methods.quantization.static_quantizer import StaticQuantizer
 from model_compression.methods.quantization.qat_quantizer import QATQuantizer
 from model_compression.methods.registry import get_method
+from model_compression.methods.utils import extract_logits
 
 
 class TestDynamicQuantizer:
@@ -116,43 +117,45 @@ class TestQATQuantizer:
     def test_extract_logits_with_logits_attr(self):
         output = Mock()
         output.logits = torch.randn(2, 10)
-        assert torch.equal(QATQuantizer._extract_logits(output), output.logits)
+        assert torch.equal(extract_logits(output), output.logits)
 
     def test_extract_logits_with_tuple(self):
         logits = torch.randn(2, 10)
-        assert torch.equal(QATQuantizer._extract_logits((logits, None)), logits)
+        assert torch.equal(extract_logits((logits, None)), logits)
 
     def test_extract_logits_with_tensor(self):
         logits = torch.randn(2, 10)
-        assert torch.equal(QATQuantizer._extract_logits(logits), logits)
+        assert torch.equal(extract_logits(logits), logits)
 
 
 class TestQuantizationRegistry:
     """Test quantization methods in registry."""
 
-    @patch("model_compression.methods.registry.DynamicQuantizer")
-    def test_get_dynamic_quantizer(self, mock_quantizer, mock_config):
+    def test_get_dynamic_quantizer(self, mock_config):
         mock_config.METHOD = "quantization.dynamic"
         mock_config.QUANT_DTYPE = "qint8"
-        get_method(mock_config)
-        mock_quantizer.assert_called_once_with(dtype="qint8")
+        result = get_method(mock_config)
+        assert isinstance(result, DynamicQuantizer)
+        assert result.dtype == torch.qint8
 
-    @patch("model_compression.methods.registry.StaticQuantizer")
-    def test_get_static_quantizer(self, mock_quantizer, mock_config):
+    def test_get_static_quantizer(self, mock_config):
         mock_config.METHOD = "quantization.static"
         mock_config.QUANT_BACKEND = "x86"
         mock_config.QUANT_CALIBRATION_BATCHES = 50
-        get_method(mock_config)
-        mock_quantizer.assert_called_once_with(backend="x86", calibration_batches=50)
+        result = get_method(mock_config)
+        assert isinstance(result, StaticQuantizer)
+        assert result.backend == "x86"
+        assert result.calibration_batches == 50
 
-    @patch("model_compression.methods.registry.QATQuantizer")
-    def test_get_qat_quantizer(self, mock_quantizer, mock_config):
+    def test_get_qat_quantizer(self, mock_config):
         mock_config.METHOD = "quantization.qat"
         mock_config.QUANT_BACKEND = "x86"
         mock_config.TRAIN_EPOCHS = 10
         mock_config.TRAIN_DEVICE = "cpu"
         mock_config.TRAIN_LR = 1e-4
-        get_method(mock_config)
-        mock_quantizer.assert_called_once_with(
-            backend="x86", epochs=10, device="cpu", lr=1e-4
-        )
+        result = get_method(mock_config)
+        assert isinstance(result, QATQuantizer)
+        assert result.backend == "x86"
+        assert result.epochs == 10
+        assert result.device == "cpu"
+        assert result.lr == 1e-4

@@ -14,11 +14,5 @@ def get_model(config: Config) -> BaseModel:
     MODEL_TYPE 환경변수에 따라 모델 래퍼 반환.
     새 모델 타입 추가: 구현체 작성 후 _registry.register()로 등록.
     """
-    # Validate key via registry (raises ValueError on unknown type)
-    _registry.get(config.MODEL_TYPE)
-
-    if config.MODEL_TYPE == "huggingface":
-        model = HuggingFaceModel(task=config.TASK)
-    else:
-        model = PyTorchModel()
-    return model.load(config.MODEL_PATH)
+    cls = _registry.get(config.MODEL_TYPE)
+    return cls.from_config(config)

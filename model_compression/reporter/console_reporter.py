@@ -6,6 +6,10 @@ class ConsoleReporter(BaseReporter):
     콘솔에 벤치마크 결과를 출력하는 리포터.
     """
 
+    @classmethod
+    def from_config(cls, config) -> "ConsoleReporter":
+        return cls()
+
     def report(self, original_result: dict, compressed_result: dict):
         print("\n" + "=" * 60)
         print(" 📊 Benchmark Results")

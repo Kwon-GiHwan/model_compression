@@ -45,3 +45,5 @@ class Config:
     BENCHMARK_DEVICE: str = field(default_factory=lambda: os.getenv("BENCHMARK_DEVICE", "mps"))
     BENCHMARK_RUNS: int = field(default_factory=lambda: int(os.getenv("BENCHMARK_RUNS", "100")))
     BENCHMARK_INPUT_SIZE: int = field(default_factory=lambda: int(os.getenv("BENCHMARK_INPUT_SIZE", "224")))
+    BENCHMARK_TYPE: str = field(default_factory=lambda: os.getenv("BENCHMARK_TYPE", "latency"))
+    REPORTER_TYPE: str = field(default_factory=lambda: os.getenv("REPORTER_TYPE", "console"))

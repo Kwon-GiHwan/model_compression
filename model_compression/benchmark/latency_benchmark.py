@@ -11,6 +11,10 @@ class LatencyBenchmark(BaseBenchmark):
     NLP는 dummy token input, 이미지는 dummy pixel input 사용.
     """
 
+    @classmethod
+    def from_config(cls, config) -> "LatencyBenchmark":
+        return cls()
+
     def run(self, model, config) -> dict:
         device = config.BENCHMARK_DEVICE
         runs = config.BENCHMARK_RUNS

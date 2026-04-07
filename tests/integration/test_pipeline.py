@@ -168,39 +168,31 @@ class TestModelLoaderIntegration:
 class TestRegistryIntegration:
     """Test that registries work together correctly."""
 
-    @patch("model_compression.model.registry.PyTorchModel")
-    @patch("model_compression.methods.registry.MagnitudePruner")
-    def test_model_and_method_registry(self, mock_pruner, mock_model, mock_config):
+    def test_model_and_method_registry(self, mock_config, simple_cnn_model, temp_dir):
         """Test that model and method registries integrate properly."""
         from model_compression.methods.registry import get_method
         from model_compression.model.registry import get_model
 
+        # Save a real model for loading
+        import torch
+        model_path = f"{temp_dir}/test_model.pt"
+        torch.save(simple_cnn_model, model_path)
+
         mock_config.MODEL_TYPE = "pytorch"
+        mock_config.MODEL_PATH = model_path
         mock_config.METHOD = "pruning.magnitude"
         mock_config.DATASET_TYPE = "local_folder"
 
-        # Get model
-        mock_instance = Mock()
-        mock_model.return_value = mock_instance
-        mock_instance.load.return_value = mock_instance
-
+        # Get model — registry uses from_config internally
         model = get_model(mock_config)
+        assert model is not None
+        assert model.get_raw() is not None
 
-        # Get method
-        mock_pruner_instance = Mock()
-        mock_pruner.return_value = mock_pruner_instance
-
+        # Get method — registry uses from_config internally
         method = get_method(mock_config)
+        assert method is not None
 
-        # Both should be retrieved successfully
-        mock_model.assert_called_once()
-        mock_pruner.assert_called_once()
-
-    @patch("model_compression.data.registry.NLPDataLoader")
-    @patch("model_compression.methods.registry.ResponseBasedDistiller")
-    def test_data_and_distillation_registry(
-        self, mock_distiller, mock_dataloader, mock_config
-    ):
+    def test_data_and_distillation_registry(self, mock_config):
         """Test that data and distillation registries work together."""
         from model_compression.data.registry import get_dataloader
         from model_compression.methods.registry import get_method
@@ -208,11 +200,12 @@ class TestRegistryIntegration:
         mock_config.DATASET_TYPE = "hf_datasets"
         mock_config.METHOD = "distillation.response_based"
 
-        # Get dataloader
+        # Get dataloader — registry uses from_config internally
+        from model_compression.data.nlp_dataloader import NLPDataLoader
         dataloader = get_dataloader(mock_config)
+        assert isinstance(dataloader, NLPDataLoader)
 
-        # Get method
+        # Get method — registry uses from_config internally
+        from model_compression.methods.distillation.response_based import ResponseBasedDistiller
         method = get_method(mock_config)
-
-        mock_dataloader.assert_called_once()
-        mock_distiller.assert_called_once()
+        assert isinstance(method, ResponseBasedDistiller)

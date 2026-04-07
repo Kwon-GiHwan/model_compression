@@ -31,6 +31,17 @@ class NLPDataLoader(BaseDataLoader):
         self.text_column = text_column
         self.label_column = label_column
 
+    @classmethod
+    def from_config(cls, config) -> "NLPDataLoader":
+        return cls(
+            dataset_name=config.DATASET_NAME,
+            tokenizer_path=config.MODEL_PATH,
+            dataset_config=config.DATASET_CONFIG,
+            split=config.DATASET_SPLIT,
+            batch_size=config.DATASET_BATCH_SIZE,
+            max_length=config.DATASET_MAX_LENGTH,
+        )
+
     def get_dataloader(self) -> DataLoader:
         dataset = load_dataset(self.dataset_name, self.dataset_config, split=self.split)
         tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_path)

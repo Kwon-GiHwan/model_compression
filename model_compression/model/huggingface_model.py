@@ -24,11 +24,11 @@ class HuggingFaceModel(BaseModel):
         # NLP 모델: 토크나이저 로드 시도
         try:
             self._tokenizer = AutoTokenizer.from_pretrained(path)
-        except Exception:
+        except Exception:  # noqa: BLE001 — tokenizer may not exist for vision models
             # Vision 모델 등 토크나이저 없는 경우
             try:
                 self._tokenizer = AutoProcessor.from_pretrained(path)
-            except Exception:
+            except Exception:  # noqa: BLE001 — processor may not exist either
                 self._tokenizer = None
 
         return self
@@ -47,3 +47,8 @@ class HuggingFaceModel(BaseModel):
 
     def get_preprocessor(self):
         return self._tokenizer
+
+    @classmethod
+    def from_config(cls, config) -> "HuggingFaceModel":
+        instance = cls(task=config.TASK)
+        return instance.load(config.MODEL_PATH)
