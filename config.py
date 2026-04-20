@@ -37,6 +37,20 @@ class BenchmarkConfig:
 
 @dataclass
 class Config:
+    """최상위 설정.
+
+    필드 네이밍 규칙:
+      - 공통 실행 설정(MODE, METHOD, MODEL_*, TASK, OUTPUT_*, INPUT_SIZE): 접두사 없이 UPPER_CASE
+      - Teacher 관련: `TEACHER_*` 접두사
+      - 방법론별 하이퍼파라미터: `<CATEGORY>_<NAME>` 형식 (예: PRUNING_RATIO, QUANT_BACKEND, DISTILL_ALPHA).
+        <CATEGORY>는 `model_compression/methods/` 하위 디렉토리명과 일치 (pruning, quantization, distillation, ...).
+      - 여러 방법론이 공유하는 설정은 nested dataclass로 분리 (data, train, benchmark).
+
+    새 방법론 추가 시:
+      - 2~3개 필드면 해당 <CATEGORY>_ 접두사로 Config에 평면 추가
+      - 5개 이상 + 2곳 이상 공유되면 nested dataclass로 분리 검토
+    """
+
     MODE: str = field(default_factory=lambda: os.getenv("MODE", "full"))
     METHOD: str = field(default_factory=lambda: os.getenv("METHOD", "pruning.magnitude"))
     MODEL_TYPE: str = field(default_factory=lambda: os.getenv("MODEL_TYPE", "huggingface"))
