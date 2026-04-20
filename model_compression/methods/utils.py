@@ -1,6 +1,4 @@
 """압축 방법론 공용 유틸리티."""
-from __future__ import annotations
-
 import torch
 
 

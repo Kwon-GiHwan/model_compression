@@ -1,6 +1,8 @@
 import copy
+from typing import Iterable
 
 import torch
+import torch.nn as nn
 
 from config import Config
 from model_compression.methods.base_method import BaseMethod
@@ -90,8 +92,8 @@ class AttentionHeadPruner(BaseMethod):
 
         return num_heads, head_size, qkv_weights
 
-    def apply(self, student, teacher=None, dataloader=None):
-        model = copy.deepcopy(student).to("cpu").eval()
+    def apply(self, student: nn.Module, teacher: nn.Module | None = None, dataloader: Iterable | None = None) -> nn.Module:
+        model = copy.deepcopy(student).cpu().eval()
 
         pruned_heads = {}
         for layer_idx, attn in self._get_attention_layers(model):
@@ -115,10 +117,10 @@ class AttentionHeadPruner(BaseMethod):
         return model
 
     @classmethod
-    def from_config(cls, config: Config):
+    def from_config(cls, config: Config) -> "AttentionHeadPruner":
         return cls(pruning_ratio=config.PRUNING_RATIO)
 
-    def validate(self, config: Config):
+    def validate(self, config: Config) -> None:
         if config.MODEL_TYPE != "huggingface":
             raise ValueError(
                 "AttentionHeadPruner는 HuggingFace Transformer 모델만 지원합니다"

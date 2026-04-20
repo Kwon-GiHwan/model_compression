@@ -1,5 +1,4 @@
 """범용 Registry 유틸리티. 데코레이터 기반 동적 등록을 지원."""
-from __future__ import annotations
 from typing import Any, Callable
 
 

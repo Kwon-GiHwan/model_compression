@@ -1,6 +1,8 @@
 import copy
+from typing import Iterable
 
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
 
 from config import Config
@@ -31,7 +33,7 @@ class QATQuantizer(BaseMethod):
     def requires_dataloader(cls) -> bool:
         return True
 
-    def apply(self, student, teacher=None, dataloader=None):
+    def apply(self, student: nn.Module, teacher: nn.Module | None = None, dataloader: Iterable | None = None) -> nn.Module:
         if dataloader is None:
             raise ValueError("[QATQuantizer] 학습용 dataloader가 필요합니다")
 
@@ -61,7 +63,7 @@ class QATQuantizer(BaseMethod):
         return quantized
 
     @classmethod
-    def from_config(cls, config: Config):
+    def from_config(cls, config: Config) -> "QATQuantizer":
         return cls(
             backend=config.QUANT_BACKEND,
             epochs=config.train.epochs,
@@ -69,6 +71,6 @@ class QATQuantizer(BaseMethod):
             lr=config.train.lr,
         )
 
-    def validate(self, config: Config):
+    def validate(self, config: Config) -> None:
         if config.train.epochs <= 0:
             raise ValueError("TRAIN_EPOCHS는 0보다 커야 합니다")

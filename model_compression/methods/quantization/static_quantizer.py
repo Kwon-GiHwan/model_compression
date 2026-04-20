@@ -1,6 +1,8 @@
 import copy
+from typing import Iterable
 
 import torch
+import torch.nn as nn
 
 from config import Config
 from model_compression.methods.base_method import BaseMethod
@@ -20,7 +22,7 @@ class StaticQuantizer(BaseMethod):
     def requires_dataloader(cls) -> bool:
         return True
 
-    def apply(self, student, teacher=None, dataloader=None):
+    def apply(self, student: nn.Module, teacher: nn.Module | None = None, dataloader: Iterable | None = None) -> nn.Module:
         if dataloader is None:
             raise ValueError("[StaticQuantizer] calibration용 dataloader가 필요합니다")
 
@@ -44,13 +46,13 @@ class StaticQuantizer(BaseMethod):
         return quantized
 
     @classmethod
-    def from_config(cls, config: Config):
+    def from_config(cls, config: Config) -> "StaticQuantizer":
         return cls(
             backend=config.QUANT_BACKEND,
             calibration_batches=config.QUANT_CALIBRATION_BATCHES,
         )
 
-    def validate(self, config: Config):
+    def validate(self, config: Config) -> None:
         valid_backends = ("x86", "fbgemm", "qnnpack")
         if config.QUANT_BACKEND not in valid_backends:
             raise ValueError(f"QUANT_BACKEND는 {valid_backends} 중 하나여야 합니다")

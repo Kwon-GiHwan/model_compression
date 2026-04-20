@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 from transformers import AutoModel, AutoProcessor, AutoTokenizer
 
 from config import Config
@@ -34,16 +35,16 @@ class HuggingFaceModel(BaseModel):
 
         return self
 
-    def save(self, path: str):
+    def save(self, path: str) -> None:
         self._model.save_pretrained(path)
         if self._tokenizer:
             self._tokenizer.save_pretrained(path)
         print(f"[HuggingFaceModel] 저장 완료: {path}")
 
-    def set_raw(self, model) -> None:
+    def set_raw(self, model: nn.Module) -> None:
         self._model = model
 
-    def get_raw(self):
+    def get_raw(self) -> nn.Module:
         return self._model
 
     def get_preprocessor(self):

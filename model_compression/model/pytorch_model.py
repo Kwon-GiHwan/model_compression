@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 
 from config import Config
 from model_compression.model.base_model import BaseModel
@@ -25,14 +26,14 @@ class PyTorchModel(BaseModel):
         print(f"[PyTorchModel] 로드 완료: {path}")
         return self
 
-    def save(self, path: str):
+    def save(self, path: str) -> None:
         torch.save(self._model, path)
         print(f"[PyTorchModel] 저장 완료: {path}")
 
-    def set_raw(self, model) -> None:
+    def set_raw(self, model: nn.Module) -> None:
         self._model = model
 
-    def get_raw(self):
+    def get_raw(self) -> nn.Module:
         return self._model
 
     def get_preprocessor(self):

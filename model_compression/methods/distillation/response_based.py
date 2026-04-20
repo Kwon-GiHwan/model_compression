@@ -1,4 +1,7 @@
+from typing import Iterable
+
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
 
 from config import Config
@@ -35,7 +38,7 @@ class ResponseBasedDistiller(BaseMethod):
     def requires_dataloader(cls) -> bool:
         return True
 
-    def apply(self, student, teacher, dataloader=None):
+    def apply(self, student: nn.Module, teacher: nn.Module | None, dataloader: Iterable | None = None) -> nn.Module:
         if teacher is None:
             raise ValueError("[Distiller] teacher 모델이 필요합니다")
         if dataloader is None:
@@ -75,7 +78,7 @@ class ResponseBasedDistiller(BaseMethod):
         return student
 
     @classmethod
-    def from_config(cls, config: Config):
+    def from_config(cls, config: Config) -> "ResponseBasedDistiller":
         return cls(
             epochs=config.train.epochs,
             device=config.train.device,
@@ -84,6 +87,6 @@ class ResponseBasedDistiller(BaseMethod):
             lr=config.train.lr,
         )
 
-    def validate(self, config: Config):
+    def validate(self, config: Config) -> None:
         if not config.TEACHER_LOADER:
             raise ValueError("Distillation은 TEACHER_LOADER 설정이 필요합니다")
