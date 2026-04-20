@@ -13,10 +13,10 @@ class TestLatencyBenchmark:
 
     def test_run_with_image_model(self, simple_cnn_model, mock_config):
         """Test running benchmark on image model."""
-        mock_config.BENCHMARK_DEVICE = "cpu"
-        mock_config.BENCHMARK_RUNS = 5
-        mock_config.BENCHMARK_INPUT_SIZE = 224
-        mock_config.DATASET_TYPE = "local_folder"
+        mock_config.benchmark.device = "cpu"
+        mock_config.benchmark.runs = 5
+        mock_config.INPUT_SIZE = 224
+        mock_config.data.type = "local_folder"
 
         benchmark = LatencyBenchmark()
         result = benchmark.run(simple_cnn_model, mock_config)
@@ -35,10 +35,10 @@ class TestLatencyBenchmark:
 
     def test_run_with_nlp_model(self, simple_mlp_model, mock_config):
         """Test running benchmark on NLP model."""
-        mock_config.BENCHMARK_DEVICE = "cpu"
-        mock_config.BENCHMARK_RUNS = 5
-        mock_config.DATASET_MAX_LENGTH = 128
-        mock_config.DATASET_TYPE = "hf_datasets"
+        mock_config.benchmark.device = "cpu"
+        mock_config.benchmark.runs = 5
+        mock_config.data.max_length = 128
+        mock_config.data.type = "hf_datasets"
 
         benchmark = LatencyBenchmark()
         result = benchmark.run(simple_mlp_model, mock_config)
@@ -50,10 +50,10 @@ class TestLatencyBenchmark:
 
     def test_result_types(self, simple_cnn_model, mock_config):
         """Test that result values have correct types."""
-        mock_config.BENCHMARK_DEVICE = "cpu"
-        mock_config.BENCHMARK_RUNS = 3
-        mock_config.BENCHMARK_INPUT_SIZE = 224
-        mock_config.DATASET_TYPE = "local_folder"
+        mock_config.benchmark.device = "cpu"
+        mock_config.benchmark.runs = 3
+        mock_config.INPUT_SIZE = 224
+        mock_config.data.type = "local_folder"
 
         benchmark = LatencyBenchmark()
         result = benchmark.run(simple_cnn_model, mock_config)
@@ -66,10 +66,10 @@ class TestLatencyBenchmark:
 
     def test_warmup_runs(self, simple_cnn_model, mock_config):
         """Test that warmup runs are executed before measurement."""
-        mock_config.BENCHMARK_DEVICE = "cpu"
-        mock_config.BENCHMARK_RUNS = 2
-        mock_config.BENCHMARK_INPUT_SIZE = 224
-        mock_config.DATASET_TYPE = "local_folder"
+        mock_config.benchmark.device = "cpu"
+        mock_config.benchmark.runs = 2
+        mock_config.INPUT_SIZE = 224
+        mock_config.data.type = "local_folder"
 
         benchmark = LatencyBenchmark()
 

@@ -1,4 +1,4 @@
-from copy import copy
+from copy import deepcopy
 
 from model_compression.benchmark.registry import get_benchmark
 from model_compression.data.registry import get_dataloader
@@ -43,7 +43,7 @@ def run_benchmark(config: Config):
     original_wrapper = get_model(config)
     original = original_wrapper.get_raw()
 
-    benchmark_config = copy(config)
+    benchmark_config = deepcopy(config)
     benchmark_config.MODEL_PATH = config.OUTPUT_MODEL_PATH
     compressed_wrapper = get_model(benchmark_config)
     compressed = compressed_wrapper.get_raw()

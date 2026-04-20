@@ -1,6 +1,7 @@
 import torch
 from transformers import AutoModel, AutoProcessor, AutoTokenizer
 
+from config import Config
 from model_compression.model.base_model import BaseModel
 
 
@@ -49,6 +50,6 @@ class HuggingFaceModel(BaseModel):
         return self._tokenizer
 
     @classmethod
-    def from_config(cls, config) -> "HuggingFaceModel":
+    def from_config(cls, config: Config) -> "HuggingFaceModel":
         instance = cls(task=config.TASK)
         return instance.load(config.MODEL_PATH)

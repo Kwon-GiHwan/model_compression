@@ -1,8 +1,9 @@
 import torch
 import torch.nn.functional as F
 
+from config import Config
 from model_compression.methods.base_method import BaseMethod
-from model_compression.methods.utils import extract_logits
+from model_compression.methods.utils import forward_and_extract_logits, unpack_batch
 
 
 class ResponseBasedDistiller(BaseMethod):
@@ -49,19 +50,10 @@ class ResponseBasedDistiller(BaseMethod):
             total_loss = 0.0
             for batch in dataloader:
                 # 이미지: (imgs, labels) / NLP: dict with input_ids 등
-                if isinstance(batch, (list, tuple)):
-                    inputs, labels = batch[0].to(self.device), batch[1].to(self.device)
-                    with torch.no_grad():
-                        teacher_logits = extract_logits(teacher(inputs))
-                    student_logits = extract_logits(student(inputs))
-                else:
-                    inputs = {
-                        k: v.to(self.device) for k, v in batch.items() if k != "label"
-                    }
-                    labels = batch["label"].to(self.device)
-                    with torch.no_grad():
-                        teacher_logits = extract_logits(teacher(**inputs))
-                    student_logits = extract_logits(student(**inputs))
+                inputs, labels = unpack_batch(batch, self.device)
+                with torch.no_grad():
+                    teacher_logits = forward_and_extract_logits(teacher, inputs)
+                student_logits = forward_and_extract_logits(student, inputs)
 
                 kd_loss = F.kl_div(
                     F.log_softmax(student_logits / T, dim=-1),
@@ -83,15 +75,15 @@ class ResponseBasedDistiller(BaseMethod):
         return student
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Config):
         return cls(
-            epochs=config.TRAIN_EPOCHS,
-            device=config.TRAIN_DEVICE,
+            epochs=config.train.epochs,
+            device=config.train.device,
             temperature=config.DISTILL_TEMPERATURE,
             alpha=config.DISTILL_ALPHA,
-            lr=config.TRAIN_LR,
+            lr=config.train.lr,
         )
 
-    def validate(self, config):
+    def validate(self, config: Config):
         if not config.TEACHER_LOADER:
             raise ValueError("Distillation은 TEACHER_LOADER 설정이 필요합니다")

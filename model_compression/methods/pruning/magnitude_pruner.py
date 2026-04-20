@@ -3,6 +3,7 @@ import copy
 import torch
 import torch_pruning as tp
 
+from config import Config
 from model_compression.methods.base_method import BaseMethod
 
 
@@ -44,15 +45,15 @@ class MagnitudePruner(BaseMethod):
         return model
 
     @classmethod
-    def from_config(cls, config):
-        is_nlp = config.DATASET_TYPE == "hf_datasets"
+    def from_config(cls, config: Config):
+        is_nlp = config.data.type == "hf_datasets"
         return cls(
             pruning_ratio=config.PRUNING_RATIO,
-            input_size=config.BENCHMARK_INPUT_SIZE,
+            input_size=config.INPUT_SIZE,
             is_nlp=is_nlp,
-            max_length=config.DATASET_MAX_LENGTH,
+            max_length=config.data.max_length,
         )
 
-    def validate(self, config):
+    def validate(self, config: Config):
         if not 0 < config.PRUNING_RATIO < 1:
             raise ValueError("PRUNING_RATIO는 0~1 사이여야 합니다")

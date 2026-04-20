@@ -36,13 +36,13 @@ def mock_config():
     config.TEACHER_HF_REPO = ""
     config.TEACHER_HF_FILENAME = None
 
-    config.DATASET_TYPE = "hf_datasets"
-    config.DATASET_NAME = "test_dataset"
-    config.DATASET_CONFIG = None
-    config.DATASET_SPLIT = "train"
-    config.DATASET_PATH = ""
-    config.DATASET_BATCH_SIZE = 16
-    config.DATASET_MAX_LENGTH = 128
+    config.data.type = "hf_datasets"
+    config.data.name = "test_dataset"
+    config.data.config = None
+    config.data.split = "train"
+    config.data.path = ""
+    config.data.batch_size = 16
+    config.data.max_length = 128
 
     config.PRUNING_RATIO = 0.3
     config.PRUNING_DEVICE = "cpu"
@@ -54,15 +54,15 @@ def mock_config():
     config.DISTILL_TEMPERATURE = 4.0
     config.DISTILL_ALPHA = 0.7
 
-    config.TRAIN_EPOCHS = 2
-    config.TRAIN_DEVICE = "cpu"
-    config.TRAIN_LR = 1e-4
+    config.train.epochs = 2
+    config.train.device = "cpu"
+    config.train.lr = 1e-4
 
-    config.BENCHMARK_DEVICE = "cpu"
-    config.BENCHMARK_RUNS = 10
-    config.BENCHMARK_INPUT_SIZE = 224
-    config.BENCHMARK_TYPE = "latency"
-    config.REPORTER_TYPE = "console"
+    config.benchmark.device = "cpu"
+    config.benchmark.runs = 10
+    config.INPUT_SIZE = 224
+    config.benchmark.type = "latency"
+    config.benchmark.reporter_type = "console"
 
     return config
 

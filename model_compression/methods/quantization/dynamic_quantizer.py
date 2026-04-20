@@ -3,6 +3,7 @@ import copy
 import torch
 import torch.nn as nn
 
+from config import Config
 from model_compression.methods.base_method import BaseMethod
 
 
@@ -25,10 +26,10 @@ class DynamicQuantizer(BaseMethod):
         return quantized
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Config):
         return cls(dtype=config.QUANT_DTYPE)
 
-    def validate(self, config):
+    def validate(self, config: Config):
         valid_dtypes = ("qint8", "float16")
         if config.QUANT_DTYPE not in valid_dtypes:
             raise ValueError(f"QUANT_DTYPE는 {valid_dtypes} 중 하나여야 합니다")

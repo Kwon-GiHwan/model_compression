@@ -2,6 +2,7 @@ import torchvision.transforms as T
 from torch.utils.data import DataLoader
 from torchvision.datasets import CocoDetection, ImageFolder
 
+from config import Config
 from model_compression.data.base_dataloader import BaseDataLoader
 
 
@@ -30,13 +31,13 @@ class ImageDataLoader(BaseDataLoader):
         self.normalize_std = normalize_std or [0.229, 0.224, 0.225]
 
     @classmethod
-    def from_config(cls, config) -> "ImageDataLoader":
+    def from_config(cls, config: Config) -> "ImageDataLoader":
         return cls(
-            dataset_path=config.DATASET_PATH,
+            dataset_path=config.data.path,
             task=config.TASK,
-            input_size=config.BENCHMARK_INPUT_SIZE,
-            batch_size=config.DATASET_BATCH_SIZE,
-            split=config.DATASET_SPLIT,
+            input_size=config.INPUT_SIZE,
+            batch_size=config.data.batch_size,
+            split=config.data.split,
         )
 
     def get_dataloader(self) -> DataLoader:

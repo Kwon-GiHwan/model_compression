@@ -1,6 +1,7 @@
 from huggingface_hub import hf_hub_download
 from transformers import AutoModel
 
+from config import Config
 from model_compression.model.loader.base_loader import BaseLoader
 
 
@@ -10,7 +11,7 @@ class HuggingFaceLoader(BaseLoader):
         self.filename = filename
 
     @classmethod
-    def from_config(cls, config) -> "HuggingFaceLoader":
+    def from_config(cls, config: Config) -> "HuggingFaceLoader":
         return cls(
             repo_id=config.TEACHER_HF_REPO,
             filename=config.TEACHER_HF_FILENAME,

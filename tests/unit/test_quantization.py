@@ -106,11 +106,11 @@ class TestQATQuantizer:
             QATQuantizer(epochs=1, device="cpu").apply(simple_cnn_model, dataloader=None)
 
     def test_validate_valid_config(self, mock_config):
-        mock_config.TRAIN_EPOCHS = 10
+        mock_config.train.epochs = 10
         QATQuantizer(epochs=10, device="cpu").validate(mock_config)
 
     def test_validate_invalid_epochs(self, mock_config):
-        mock_config.TRAIN_EPOCHS = 0
+        mock_config.train.epochs = 0
         with pytest.raises(ValueError, match="TRAIN_EPOCHS"):
             QATQuantizer(epochs=1, device="cpu").validate(mock_config)
 
@@ -150,9 +150,9 @@ class TestQuantizationRegistry:
     def test_get_qat_quantizer(self, mock_config):
         mock_config.METHOD = "quantization.qat"
         mock_config.QUANT_BACKEND = "x86"
-        mock_config.TRAIN_EPOCHS = 10
-        mock_config.TRAIN_DEVICE = "cpu"
-        mock_config.TRAIN_LR = 1e-4
+        mock_config.train.epochs = 10
+        mock_config.train.device = "cpu"
+        mock_config.train.lr = 1e-4
         result = get_method(mock_config)
         assert isinstance(result, QATQuantizer)
         assert result.backend == "x86"

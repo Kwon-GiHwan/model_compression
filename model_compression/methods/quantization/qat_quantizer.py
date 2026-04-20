@@ -3,8 +3,9 @@ import copy
 import torch
 import torch.nn.functional as F
 
+from config import Config
 from model_compression.methods.base_method import BaseMethod
-from model_compression.methods.utils import extract_logits
+from model_compression.methods.utils import extract_logits, forward_and_extract_logits, unpack_batch
 
 
 class QATQuantizer(BaseMethod):
@@ -43,15 +44,8 @@ class QATQuantizer(BaseMethod):
         for epoch in range(self.epochs):
             total_loss = 0.0
             for batch in dataloader:
-                if isinstance(batch, (list, tuple)):
-                    inputs, labels = batch[0].to(self.device), batch[1].to(self.device)
-                    logits = extract_logits(prepared(inputs))
-                else:
-                    inputs = {
-                        k: v.to(self.device) for k, v in batch.items() if k != "label"
-                    }
-                    labels = batch["label"].to(self.device)
-                    logits = extract_logits(prepared(**inputs))
+                inputs, labels = unpack_batch(batch, self.device)
+                logits = forward_and_extract_logits(prepared, inputs)
 
                 loss = F.cross_entropy(logits, labels)
                 optimizer.zero_grad()
@@ -67,14 +61,14 @@ class QATQuantizer(BaseMethod):
         return quantized
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Config):
         return cls(
             backend=config.QUANT_BACKEND,
-            epochs=config.TRAIN_EPOCHS,
-            device=config.TRAIN_DEVICE,
-            lr=config.TRAIN_LR,
+            epochs=config.train.epochs,
+            device=config.train.device,
+            lr=config.train.lr,
         )
 
-    def validate(self, config):
-        if config.TRAIN_EPOCHS <= 0:
+    def validate(self, config: Config):
+        if config.train.epochs <= 0:
             raise ValueError("TRAIN_EPOCHS는 0보다 커야 합니다")

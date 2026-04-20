@@ -130,9 +130,9 @@ class TestMethodsRegistry:
         """Test getting magnitude pruner from registry."""
         mock_config.METHOD = "pruning.magnitude"
         mock_config.PRUNING_RATIO = 0.3
-        mock_config.BENCHMARK_INPUT_SIZE = 224
-        mock_config.DATASET_TYPE = "hf_datasets"
-        mock_config.DATASET_MAX_LENGTH = 128
+        mock_config.INPUT_SIZE = 224
+        mock_config.data.type = "hf_datasets"
+        mock_config.data.max_length = 128
 
         result = get_method(mock_config)
 
@@ -154,11 +154,11 @@ class TestMethodsRegistry:
     def test_get_response_based_distiller(self, mock_config):
         """Test getting response based distiller from registry."""
         mock_config.METHOD = "distillation.response_based"
-        mock_config.TRAIN_EPOCHS = 10
-        mock_config.TRAIN_DEVICE = "cpu"
+        mock_config.train.epochs = 10
+        mock_config.train.device = "cpu"
         mock_config.DISTILL_TEMPERATURE = 4.0
         mock_config.DISTILL_ALPHA = 0.7
-        mock_config.TRAIN_LR = 1e-4
+        mock_config.train.lr = 1e-4
 
         result = get_method(mock_config)
 

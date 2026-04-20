@@ -1,13 +1,13 @@
-from model_compression.reporter.base_reporter import BaseReporter
+from config import Config
 
 
-class ConsoleReporter(BaseReporter):
+class ConsoleReporter:
     """
     콘솔에 벤치마크 결과를 출력하는 리포터.
     """
 
     @classmethod
-    def from_config(cls, config) -> "ConsoleReporter":
+    def from_config(cls, config: Config) -> "ConsoleReporter":
         return cls()
 
     def report(self, original_result: dict, compressed_result: dict):

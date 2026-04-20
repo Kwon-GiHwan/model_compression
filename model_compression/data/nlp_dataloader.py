@@ -2,6 +2,7 @@ from datasets import load_dataset
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 
+from config import Config
 from model_compression.data.base_dataloader import BaseDataLoader
 
 
@@ -32,14 +33,14 @@ class NLPDataLoader(BaseDataLoader):
         self.label_column = label_column
 
     @classmethod
-    def from_config(cls, config) -> "NLPDataLoader":
+    def from_config(cls, config: Config) -> "NLPDataLoader":
         return cls(
-            dataset_name=config.DATASET_NAME,
+            dataset_name=config.data.name,
             tokenizer_path=config.MODEL_PATH,
-            dataset_config=config.DATASET_CONFIG,
-            split=config.DATASET_SPLIT,
-            batch_size=config.DATASET_BATCH_SIZE,
-            max_length=config.DATASET_MAX_LENGTH,
+            dataset_config=config.data.config,
+            split=config.data.split,
+            batch_size=config.data.batch_size,
+            max_length=config.data.max_length,
         )
 
     def get_dataloader(self) -> DataLoader:

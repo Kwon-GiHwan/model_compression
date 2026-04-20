@@ -32,7 +32,7 @@ class TestEndToEndMagnitudePruning:
         mock_config.METHOD = "pruning.magnitude"
         mock_config.MODEL_TYPE = "pytorch"
         mock_config.OUTPUT_MODEL_PATH = f"{temp_dir}/output.pt"
-        mock_config.DATASET_TYPE = "local_folder"
+        mock_config.data.type = "local_folder"
 
         # Mock model loading via get_model (registry now uses from_config internally)
         mock_model_instance = Mock()
@@ -104,10 +104,10 @@ class TestEndToEndFullMode:
         mock_config.METHOD = "pruning.magnitude"
         mock_config.MODEL_TYPE = "pytorch"
         mock_config.OUTPUT_MODEL_PATH = f"{temp_dir}/full_output.pt"
-        mock_config.BENCHMARK_DEVICE = "cpu"
-        mock_config.BENCHMARK_RUNS = 2
-        mock_config.DATASET_TYPE = "local_folder"
-        mock_config.BENCHMARK_INPUT_SIZE = 224
+        mock_config.benchmark.device = "cpu"
+        mock_config.benchmark.runs = 2
+        mock_config.data.type = "local_folder"
+        mock_config.INPUT_SIZE = 224
 
         # Mock model via get_model (registry now uses from_config internally)
         mock_model_instance = Mock()

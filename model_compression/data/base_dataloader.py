@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Iterable
+from typing import Iterable
+
+from config import Config
 
 
 class BaseDataLoader(ABC):
@@ -14,5 +16,5 @@ class BaseDataLoader(ABC):
     def get_dataloader(self) -> Iterable: ...
 
     @classmethod
-    def from_config(cls, config: Any) -> "BaseDataLoader":
-        raise NotImplementedError
+    @abstractmethod
+    def from_config(cls, config: Config) -> "BaseDataLoader": ...

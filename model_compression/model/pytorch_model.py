@@ -1,5 +1,6 @@
 import torch
 
+from config import Config
 from model_compression.model.base_model import BaseModel
 
 
@@ -38,6 +39,6 @@ class PyTorchModel(BaseModel):
         return None
 
     @classmethod
-    def from_config(cls, config) -> "PyTorchModel":
+    def from_config(cls, config: Config) -> "PyTorchModel":
         instance = cls()
         return instance.load(config.MODEL_PATH)

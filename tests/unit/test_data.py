@@ -111,12 +111,12 @@ class TestDataRegistry:
 
     def test_get_nlp_dataloader(self, mock_config):
         """Test getting NLP dataloader from registry."""
-        mock_config.DATASET_TYPE = "hf_datasets"
-        mock_config.DATASET_NAME = "test_dataset"
-        mock_config.DATASET_CONFIG = "config"
-        mock_config.DATASET_SPLIT = "train"
-        mock_config.DATASET_BATCH_SIZE = 16
-        mock_config.DATASET_MAX_LENGTH = 128
+        mock_config.data.type = "hf_datasets"
+        mock_config.data.name = "test_dataset"
+        mock_config.data.config = "config"
+        mock_config.data.split = "train"
+        mock_config.data.batch_size = 16
+        mock_config.data.max_length = 128
         mock_config.MODEL_PATH = "test/model"
 
         result = get_dataloader(mock_config)
@@ -131,12 +131,12 @@ class TestDataRegistry:
 
     def test_get_image_dataloader(self, mock_config):
         """Test getting image dataloader from registry."""
-        mock_config.DATASET_TYPE = "local_folder"
-        mock_config.DATASET_PATH = "/test/images"
+        mock_config.data.type = "local_folder"
+        mock_config.data.path = "/test/images"
         mock_config.TASK = "classification"
-        mock_config.BENCHMARK_INPUT_SIZE = 224
-        mock_config.DATASET_BATCH_SIZE = 32
-        mock_config.DATASET_SPLIT = "train"
+        mock_config.INPUT_SIZE = 224
+        mock_config.data.batch_size = 32
+        mock_config.data.split = "train"
 
         result = get_dataloader(mock_config)
 
@@ -149,7 +149,7 @@ class TestDataRegistry:
 
     def test_get_invalid_dataset_type(self, mock_config):
         """Test that invalid dataset type raises error."""
-        mock_config.DATASET_TYPE = "invalid_type"
+        mock_config.data.type = "invalid_type"
 
         with pytest.raises(ValueError, match="지원하지 않는 DATASET_TYPE"):
             get_dataloader(mock_config)

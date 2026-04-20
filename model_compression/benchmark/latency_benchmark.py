@@ -2,34 +2,34 @@ import time
 
 import torch
 
-from model_compression.benchmark.base_benchmark import BaseBenchmark
+from config import Config
 
 
-class LatencyBenchmark(BaseBenchmark):
+class LatencyBenchmark:
     """
     추론 속도 측정. 이미지/NLP 모델 공통 사용.
     NLP는 dummy token input, 이미지는 dummy pixel input 사용.
     """
 
     @classmethod
-    def from_config(cls, config) -> "LatencyBenchmark":
+    def from_config(cls, config: Config) -> "LatencyBenchmark":
         return cls()
 
-    def run(self, model, config) -> dict:
-        device = config.BENCHMARK_DEVICE
-        runs = config.BENCHMARK_RUNS
-        is_nlp = config.DATASET_TYPE == "hf_datasets"
+    def run(self, model, config: Config) -> dict:
+        device = config.benchmark.device
+        runs = config.benchmark.runs
+        is_nlp = config.data.type == "hf_datasets"
 
         model = model.to(device).eval()
 
         if is_nlp:
             dummy = {
                 "input_ids": torch.zeros(
-                    1, config.DATASET_MAX_LENGTH, dtype=torch.long
+                    1, config.data.max_length, dtype=torch.long
                 ).to(device)
             }
         else:
-            s = config.BENCHMARK_INPUT_SIZE
+            s = config.INPUT_SIZE
             dummy = torch.randn(1, 3, s, s).to(device)
 
         with torch.no_grad():

@@ -12,5 +12,5 @@ _registry.register("local_folder")(ImageDataLoader)
 
 def get_dataloader(config: Config) -> BaseDataLoader:
     """DATASET_TYPE 환경변수에 따라 DataLoader 반환."""
-    cls = _registry.get(config.DATASET_TYPE)
+    cls = _registry.get(config.data.type)
     return cls.from_config(config)

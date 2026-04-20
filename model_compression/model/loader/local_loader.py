@@ -1,6 +1,7 @@
 import torch
 from transformers import AutoModel
 
+from config import Config
 from model_compression.model.loader.base_loader import BaseLoader
 
 
@@ -9,7 +10,7 @@ class LocalLoader(BaseLoader):
         self.model_path = model_path
 
     @classmethod
-    def from_config(cls, config) -> "LocalLoader":
+    def from_config(cls, config: Config) -> "LocalLoader":
         return cls(model_path=config.TEACHER_MODEL_PATH)
 
     def load(self):

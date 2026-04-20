@@ -2,6 +2,7 @@ import copy
 
 import torch
 
+from config import Config
 from model_compression.methods.base_method import BaseMethod
 
 
@@ -114,10 +115,10 @@ class AttentionHeadPruner(BaseMethod):
         return model
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Config):
         return cls(pruning_ratio=config.PRUNING_RATIO)
 
-    def validate(self, config):
+    def validate(self, config: Config):
         if config.MODEL_TYPE != "huggingface":
             raise ValueError(
                 "AttentionHeadPruner는 HuggingFace Transformer 모델만 지원합니다"

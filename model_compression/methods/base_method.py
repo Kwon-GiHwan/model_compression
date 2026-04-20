@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Iterable
+
+import torch.nn as nn
+
+from config import Config
 
 
 class BaseMethod(ABC):
@@ -20,16 +24,15 @@ class BaseMethod(ABC):
 
     @abstractmethod
     def apply(
-        self, student: Any, teacher: Any = None, dataloader: Any = None
-    ) -> Any: ...
+        self, student: nn.Module, teacher: nn.Module | None = None, dataloader: Iterable | None = None
+    ) -> nn.Module: ...
 
-    def validate(self, config: Any) -> None:
+    def validate(self, config: Config) -> None:
         pass
 
     @classmethod
-    def from_config(cls, config: Any) -> "BaseMethod":
-        """Config 기반으로 인스턴스 생성. 서브클래스에서 반드시 구현."""
-        raise NotImplementedError(f"{cls.__name__}.from_config()이 구현되지 않았습니다")
+    @abstractmethod
+    def from_config(cls, config: Config) -> "BaseMethod": ...
 
     @classmethod
     def requires_teacher(cls) -> bool:

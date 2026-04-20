@@ -19,8 +19,8 @@ class TestConfig:
             # Clear environment and reload
             config = Config()
             assert config.MODE == "full"
-            assert config.BENCHMARK_RUNS == 100
-            assert config.TRAIN_EPOCHS == 20
+            assert config.benchmark.runs == 100
+            assert config.train.epochs == 20
 
     def test_config_env_override(self):
         """Test that environment variables override defaults."""
@@ -44,7 +44,7 @@ class TestConfig:
             assert config.MODE == "apply"
             assert config.METHOD == "distillation.response_based"
             assert config.PRUNING_RATIO == 0.5
-            assert config.BENCHMARK_RUNS == 50
+            assert config.benchmark.runs == 50
 
     def test_config_type_conversion(self):
         """Test that Config converts types correctly."""
@@ -59,10 +59,10 @@ class TestConfig:
             importlib.reload(config_module)
 
             config = config_module.Config()
-            assert isinstance(config.DATASET_BATCH_SIZE, int)
+            assert isinstance(config.data.batch_size, int)
             assert isinstance(config.PRUNING_RATIO, float)
-            assert isinstance(config.TRAIN_EPOCHS, int)
-            assert config.DATASET_BATCH_SIZE == 32
+            assert isinstance(config.train.epochs, int)
+            assert config.data.batch_size == 32
             assert config.PRUNING_RATIO == 0.4
 
     def test_config_none_handling(self):

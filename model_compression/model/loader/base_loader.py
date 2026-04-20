@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
+from config import Config
+
 
 class BaseLoader(ABC):
     @abstractmethod
@@ -10,5 +12,5 @@ class BaseLoader(ABC):
         ...
 
     @classmethod
-    def from_config(cls, config) -> "BaseLoader":
-        raise NotImplementedError
+    @abstractmethod
+    def from_config(cls, config: Config) -> "BaseLoader": ...

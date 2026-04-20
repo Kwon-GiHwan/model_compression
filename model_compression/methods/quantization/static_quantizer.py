@@ -2,6 +2,7 @@ import copy
 
 import torch
 
+from config import Config
 from model_compression.methods.base_method import BaseMethod
 
 
@@ -43,13 +44,13 @@ class StaticQuantizer(BaseMethod):
         return quantized
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Config):
         return cls(
             backend=config.QUANT_BACKEND,
             calibration_batches=config.QUANT_CALIBRATION_BATCHES,
         )
 
-    def validate(self, config):
+    def validate(self, config: Config):
         valid_backends = ("x86", "fbgemm", "qnnpack")
         if config.QUANT_BACKEND not in valid_backends:
             raise ValueError(f"QUANT_BACKEND는 {valid_backends} 중 하나여야 합니다")

@@ -31,10 +31,10 @@ class TestPruningPipeline:
         mock_config.MODEL_PATH = model_path
         mock_config.OUTPUT_MODEL_PATH = output_path
         mock_config.PRUNING_RATIO = 0.3
-        mock_config.BENCHMARK_DEVICE = "cpu"
-        mock_config.BENCHMARK_RUNS = 3
-        mock_config.BENCHMARK_INPUT_SIZE = 224
-        mock_config.DATASET_TYPE = "local_folder"
+        mock_config.benchmark.device = "cpu"
+        mock_config.benchmark.runs = 3
+        mock_config.INPUT_SIZE = 224
+        mock_config.data.type = "local_folder"
 
         # Mock pruning
         mock_pruner = Mock()
@@ -92,18 +92,18 @@ class TestBenchmarkPipeline:
 
     def test_compare_two_models(self, simple_cnn_model, simple_mlp_model, mock_config):
         """Test benchmarking and comparing two different models."""
-        mock_config.BENCHMARK_DEVICE = "cpu"
-        mock_config.BENCHMARK_RUNS = 3
-        mock_config.BENCHMARK_INPUT_SIZE = 224
-        mock_config.DATASET_TYPE = "local_folder"
+        mock_config.benchmark.device = "cpu"
+        mock_config.benchmark.runs = 3
+        mock_config.INPUT_SIZE = 224
+        mock_config.data.type = "local_folder"
 
         benchmark = LatencyBenchmark()
 
         result1 = benchmark.run(simple_cnn_model, mock_config)
 
         # For MLP, we need to adjust config for NLP
-        mock_config.DATASET_TYPE = "hf_datasets"
-        mock_config.DATASET_MAX_LENGTH = 128
+        mock_config.data.type = "hf_datasets"
+        mock_config.data.max_length = 128
         result2 = benchmark.run(simple_mlp_model, mock_config)
 
         # Both should have valid results
@@ -113,10 +113,10 @@ class TestBenchmarkPipeline:
 
     def test_benchmark_reproducibility(self, simple_cnn_model, mock_config):
         """Test that benchmark results are consistent across runs."""
-        mock_config.BENCHMARK_DEVICE = "cpu"
-        mock_config.BENCHMARK_RUNS = 5
-        mock_config.BENCHMARK_INPUT_SIZE = 224
-        mock_config.DATASET_TYPE = "local_folder"
+        mock_config.benchmark.device = "cpu"
+        mock_config.benchmark.runs = 5
+        mock_config.INPUT_SIZE = 224
+        mock_config.data.type = "local_folder"
 
         benchmark = LatencyBenchmark()
 
@@ -181,7 +181,7 @@ class TestRegistryIntegration:
         mock_config.MODEL_TYPE = "pytorch"
         mock_config.MODEL_PATH = model_path
         mock_config.METHOD = "pruning.magnitude"
-        mock_config.DATASET_TYPE = "local_folder"
+        mock_config.data.type = "local_folder"
 
         # Get model — registry uses from_config internally
         model = get_model(mock_config)
@@ -197,7 +197,7 @@ class TestRegistryIntegration:
         from model_compression.data.registry import get_dataloader
         from model_compression.methods.registry import get_method
 
-        mock_config.DATASET_TYPE = "hf_datasets"
+        mock_config.data.type = "hf_datasets"
         mock_config.METHOD = "distillation.response_based"
 
         # Get dataloader — registry uses from_config internally
