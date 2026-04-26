@@ -95,7 +95,7 @@ jobs:
                   --arg commit "${COMMIT_SHA}" \
                   --arg model_path "${MODELS_DIR}/model_${COMMIT_SHA}.tflite" \
                   --arg source_repo "${GITHUB_REPOSITORY}" \
-                  '{event_type: "model_trained",
+                  '{event_type: "new_model_ready",
                     client_payload: {commit:$commit, model_path:$model_path, source_repo:$source_repo}}')"
 
       - name: Upload training log (always)
