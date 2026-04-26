@@ -90,7 +90,7 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${NPU_DISPATCH_TOKEN}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/Kwon-GiHwan/NPU-Sim-Repo/dispatches \
+            https://api.github.com/repos/Kwon-GiHwan/fpga_simulator/dispatches \
             -d "$(jq -n \
                   --arg commit "${COMMIT_SHA}" \
                   --arg model_path "${MODELS_DIR}/model_${COMMIT_SHA}.tflite" \
