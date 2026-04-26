@@ -1,0 +1,37 @@
+# compression_tool 학습/변환용 이미지 (CPU only, demo 시나리오 검증).
+# Ethos-U 호환 모델 출력을 위해 PyTorch + ONNX + onnx2tf + TensorFlow 포함.
+FROM python:3.10-slim
+
+WORKDIR /workspace
+
+# 시스템 의존성
+RUN apt-get update && apt-get install -y \
+    git curl wget build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# PyTorch (CPU only — demo 검증용. 실제 GPU 학습 시 별도 이미지 권장)
+RUN pip install --no-cache-dir \
+    torch==2.1.0+cpu torchvision==0.16.0+cpu \
+    --index-url https://download.pytorch.org/whl/cpu
+
+# 압축 도구 의존성
+RUN pip install --no-cache-dir \
+    transformers \
+    datasets \
+    huggingface-hub \
+    python-dotenv \
+    torch-pruning
+
+# TFLite 변환 도구 (PyTorch → ONNX → TFLite)
+RUN pip install --no-cache-dir \
+    onnx \
+    onnxsim \
+    sng4onnx \
+    "tensorflow<2.16" \
+    onnx2tf
+
+# numpy 호환성 보강 (tensorflow 2.15는 numpy<2 요구)
+RUN pip install --no-cache-dir "numpy<2"
+
+ENV PYTHONPATH=/workspace
+WORKDIR /workspace
