@@ -23,18 +23,28 @@ WORKSPACE_HOST="$(pwd)"
 
 mkdir -p "$MODELS_DIR" "$LOGS_DIR"
 
+# 검증된 sample TFLite 모델 경로 (호스트, fpga-simulator 이미지에서 1회 추출됨).
+# TODO: ai-edge-torch로 PyTorch → TFLite 직접 변환 도입 시 본 경로 의존 제거 예정.
+SAMPLE_TFLITE="${SAMPLE_TFLITE:-/home/gihwan/sample-models/sample.tflite}"
+[[ -f "$SAMPLE_TFLITE" ]] || { echo "[train.sh] ERROR: sample tflite not found: $SAMPLE_TFLITE" >&2; exit 1; }
+
 # 동일 SHA 재실행 시 잔존 컨테이너 정리
 docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
 
 echo "[train.sh] image=$IMAGE  container=$CONTAINER_NAME  commit=$COMMIT_SHA"
 
-# 학습+변환 컨테이너 — demo 시나리오:
-#   torchvision MobileNetV3-Small → magnitude pruning(0.3) → TFLite (fp32)
+# 학습 컨테이너 — demo 시나리오:
+#   torchvision MobileNetV3-Small → magnitude pruning(0.3) → 검증용 TFLite copy
+#
+# 주의: 본 단계는 B 임시 시나리오. PyTorch 학습 결과(.pt)는 /tmp 안에서만 검증되고,
+# 최종 /output/model.tflite는 호스트의 sample.tflite로 대체된다.
+# vela/MLEK/FVP의 동작 검증이 목적이며, ai-edge-torch 도입 후 실제 변환으로 교체 예정.
 docker run -d \
   --name "$CONTAINER_NAME" \
   --shm-size=2g \
   -v "${WORKSPACE_HOST}:/workspace:ro" \
   -v "${MODELS_DIR}:/output" \
+  -v "${SAMPLE_TFLITE}:/sample.tflite:ro" \
   -e COMMIT_SHA="$COMMIT_SHA" \
   -w /workspace \
   "$IMAGE" \
@@ -54,14 +64,11 @@ docker run -d \
     DATASET_TYPE=torchvision \
       python -m main
 
-    echo "=== [3/3] PyTorch → TFLite 변환 ==="
-    python /workspace/scripts/convert_to_tflite.py \
-      /tmp/compressed_model.pt \
-      /output/model.tflite \
-      1,3,224,224
-
-    echo "=== Done. /output/model.tflite ==="
+    echo "=== [3/3] (B 시나리오) 검증된 sample TFLite를 출력으로 복사 ==="
+    cp /sample.tflite /output/model.tflite
     ls -la /output/model.tflite
+
+    echo "=== Done ==="
   '
 
 # 로그 실시간 리다이렉션 (tee로 stdout 동시 유지 → GitHub Actions UI에도 흐름)
