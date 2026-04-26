@@ -51,6 +51,7 @@ docker run -d \
     PRUNING_RATIO=0.3 \
     OUTPUT_MODEL_PATH=/tmp/compressed_model.pt \
     INPUT_SIZE=224 \
+    DATASET_TYPE=torchvision \
       python -m main
 
     echo "=== [3/3] PyTorch → TFLite 변환 ==="
