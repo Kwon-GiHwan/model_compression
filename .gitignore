@@ -60,6 +60,11 @@ logs/
 .env.local
 .env.*.local
 
+# Local environment files (server .env, secrets)
+.env
+*.env
+!*.env.example
+
 # Jupyter
 .ipynb_checkpoints/
 *.ipynb

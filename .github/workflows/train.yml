@@ -19,9 +19,7 @@ jobs:
     timeout-minutes: 720               # 학습 최대 12시간
     env:
       COMMIT_SHA: ${{ github.sha }}
-      IMAGE: ${{ vars.IMAGE }}
-      MODELS_DIR: ${{ vars.MODELS_DIR }}
-      LOGS_DIR: ${{ vars.LOGS_DIR }}
+      CONFIG_FILE: /home/gihwan/.ml-train.env
       SRC_PATH: model_compression       # 사용자 요청의 'src' → 실제 디렉토리
 
     steps:
@@ -30,11 +28,51 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Load server config
+        run: |
+          set -e
+          if [[ ! -r "$CONFIG_FILE" ]]; then
+            echo "ERROR: config file not found or unreadable: $CONFIG_FILE" >&2
+            echo "서버에 ${CONFIG_FILE} 파일을 chmod 600 으로 작성해야 합니다." >&2
+            echo "내용 예시는 docs/2026-04-26-ci-runner-setup.md 참조." >&2
+            exit 1
+          fi
+          # 권한이 600 또는 400 이어야 함 (그룹/타인에게 노출 금지)
+          mode="$(stat -c '%a' "$CONFIG_FILE")"
+          case "$mode" in
+            600|400) ;;
+            *)
+              echo "ERROR: $CONFIG_FILE permissions must be 600 (or 400), got $mode" >&2
+              echo "  fix: chmod 600 $CONFIG_FILE" >&2
+              exit 1
+              ;;
+          esac
+          # KEY=VALUE 라인을 GITHUB_ENV에 주입 (주석/빈줄 무시, 따옴표 제거)
+          while IFS='=' read -r key value; do
+            # 빈 줄, 주석 무시
+            [[ -z "$key" || "$key" =~ ^[[:space:]]*# ]] && continue
+            # key 양쪽 공백 제거
+            key="${key#"${key%%[![:space:]]*}"}"
+            key="${key%"${key##*[![:space:]]}"}"
+            # value 양쪽 공백 + 따옴표 제거
+            value="${value#"${value%%[![:space:]]*}"}"
+            value="${value%"${value##*[![:space:]]}"}"
+            value="${value%\"}"; value="${value#\"}"
+            value="${value%\'}"; value="${value#\'}"
+            echo "${key}=${value}" >> "$GITHUB_ENV"
+            # 토큰성 키는 logs 마스킹
+            if [[ "$key" =~ TOKEN|SECRET|PASSWORD|APIKEY|API_KEY ]]; then
+              echo "::add-mask::${value}"
+            fi
+          done < "$CONFIG_FILE"
+
       - name: Sanity check (server env)
         run: |
           set -e
           echo "Runner: $(hostname)"
-          echo "Image:  ${IMAGE:?IMAGE variable is required}"
+          : "${IMAGE:?IMAGE not loaded from $CONFIG_FILE}"
+          : "${MODELS_DIR:?MODELS_DIR not loaded from $CONFIG_FILE}"
+          : "${LOGS_DIR:?LOGS_DIR not loaded from $CONFIG_FILE}"
           docker --version
           test -d "$MODELS_DIR" || mkdir -p "$MODELS_DIR"
           test -d "$LOGS_DIR" || mkdir -p "$LOGS_DIR"
@@ -45,13 +83,12 @@ jobs:
 
       - name: Notify NPU-Sim-Repo
         if: success()
-        env:
-          DISPATCH_TOKEN: ${{ secrets.NPU_DISPATCH_TOKEN }}
         run: |
           set -e
+          : "${NPU_DISPATCH_TOKEN:?token not loaded from $CONFIG_FILE}"
           curl -fsSL -X POST \
             -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${DISPATCH_TOKEN}" \
+            -H "Authorization: Bearer ${NPU_DISPATCH_TOKEN}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             https://api.github.com/repos/Kwon-GiHwan/NPU-Sim-Repo/dispatches \
             -d "$(jq -n \

@@ -68,34 +68,61 @@ sudo ./svc.sh stop && sudo ./svc.sh start
 
 GitHub repo → Settings → Actions → Runners 에서 `gihwan-local-runner`가 **Idle** 상태로 표시되어야 함.
 
+## 서버 측 환경 설정 (.env)
+
+이 워크플로우는 GitHub UI에 Secrets/Variables를 등록하지 않습니다. 모든 설정은
+runner 머신의 로컬 파일에서 읽어옵니다 (self-hosted runner의 신뢰 환경 활용).
+
+### 6. `.env` 파일 작성
+
+```bash
+# gihwan 사용자 홈 디렉토리에 작성
+cat > /home/gihwan/.ml-train.env <<'EOF'
+# 학습 컨테이너 이미지 태그
+IMAGE=registry.local/ml-train:latest
+
+# 산출물/로그 경로
+MODELS_DIR=/home/user/models
+LOGS_DIR=/home/gihwan/ml-logs
+
+# NPU-Sim-Repo dispatch 권한 PAT (fine-grained, 만료 30~90일)
+NPU_DISPATCH_TOKEN=ghp_새로발급받은토큰값
+EOF
+
+# 권한을 600(소유자만 읽기/쓰기)으로 강제 — 워크플로우가 이를 검증함
+chmod 600 /home/gihwan/.ml-train.env
+ls -l /home/gihwan/.ml-train.env  # -rw------- 확인
+```
+
+### 7. NPU_DISPATCH_TOKEN 발급
+
+GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens
+
+- Repository access: `Kwon-GiHwan/NPU-Sim-Repo` 만
+- Permissions → Contents: `Read and write` (또는 Actions: Write)
+- Expiration: 30~90일 권장
+
+발급된 토큰을 위 `.env`의 `NPU_DISPATCH_TOKEN` 값으로 입력.
+
+> **주의**: 기존에 채팅에 평문 노출된 PAT(`ghp_4YEj...`)는 즉시 Revoke 필요.  
+> https://github.com/settings/tokens 에서 해당 토큰 삭제.
+
+### 8. 백업 정책 권장
+
+서버 백업 시 `.env` 파일은 제외하거나 별도 암호화 보관. 토큰이 평문이므로
+백업 매체 노출이 곧 토큰 노출이다. `~/.backup-exclude` 같은 rsync exclude
+리스트에 `*.env` 추가 권장.
+
 ## 운영
 
 - 재부팅 후 자동 시작: systemd가 처리
 - Runner 자체 업데이트: 보통 자동. 수동 시 `./config.sh remove` 후 재등록
 - 로그: `journalctl -u actions.runner.* -f`
+- 설정 변경: `/home/gihwan/.ml-train.env` 직접 수정 (다음 워크플로우 실행부터 반영)
+- 토큰 만료 시: `.env`에서 `NPU_DISPATCH_TOKEN` 값만 갱신, GitHub UI 진입 불필요
 
-## GitHub 측 사전 설정
+## GitHub UI에서 등록할 것 (요약)
 
-`Kwon-GiHwan/model_compression` → Settings → Secrets and variables → Actions 에서 등록.
-
-### Secrets
-
-| 이름 | 값 | 설명 |
-|------|----|------|
-| `NPU_DISPATCH_TOKEN` | 새로 발급한 fine-grained PAT | NPU-Sim-Repo에 `repository_dispatch` 트리거 용도 |
-
-PAT 발급 시 설정:
-- Repository access: `Kwon-GiHwan/NPU-Sim-Repo`만
-- Permissions → Contents: `Read and write` (또는 Actions: Write)
-- 만료 30~90일 권장
-
-> **주의**: 기존에 채팅에 평문 노출된 PAT(`ghp_4YEj...`)는 즉시 Revoke 필요.  
-> https://github.com/settings/tokens 에서 해당 토큰 삭제 후 재발급.
-
-### Variables
-
-| 이름 | 예시값 | 설명 |
-|------|--------|------|
-| `IMAGE` | `registry.local/ml-train:latest` | 학습 컨테이너 이미지 태그 |
-| `MODELS_DIR` | `/home/user/models` | 학습 산출물(.tflite) 저장 경로 |
-| `LOGS_DIR` | `/home/gihwan/ml-logs` | 학습 로그 저장 경로 |
+**없음.** 모든 자격증명/설정은 서버 `.env`에서 읽습니다. self-hosted runner
+등록 시 1회용 registration token만 GitHub UI에서 발급받으면 됩니다 (그 외 영구
+등록 항목 없음).
